@@ -18,5 +18,10 @@ class DatabaseSeeder extends Seeder
         //     'name' => 'Test User',
         //     'email' => 'test@example.com',
         // ]);
+
+        \App\Models\Url::create([
+            'original_url' => 'https://example.com',
+            'shortened_url' => 'exmpl',
+        ]);
     }
 }
