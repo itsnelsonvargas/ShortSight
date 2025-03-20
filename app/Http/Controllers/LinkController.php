@@ -25,11 +25,14 @@ class LinkController extends Controller
     public function show($id)
     {
         try {
+            //Look for the slug in the database
             $link = Link::where('short', $id)->firstOrFail();
-            //if no link is found, it will throw a 404 error
             
-            return redirect($link->url);
+            
+            //redirect to the URL based on the slug  (Can be viewed in the database)
+            return redirect($link->url); 
         } catch (\Exception $e) {
+            //if no link is found, it will throw a 404 error
             return abort(404);
         }
           
