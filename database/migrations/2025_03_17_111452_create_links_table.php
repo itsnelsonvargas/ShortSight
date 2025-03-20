@@ -17,7 +17,8 @@ return new class extends Migration
             $table->string('title')->nullable();
             $table->string('description')->nullable(); 
             $table->string('url');
-            $table->string('short')->unique();
+            $table->string('slug')->unique();
+            
             $table->timestamps();
             $table->softDeletes(); // Added softDeletes for deleted_at column
         });

@@ -16,13 +16,13 @@ class LinkSeeder extends Seeder
         \App\Models\Link::insert([
             [
             'url' => 'https://facebook.com',
-            'short' => 'fb',
+            'slug' => 'fb',
             'created_at' => now(),
             'updated_at' => now(),
             ],
             [
             'url' => 'https://youtube.com',
-            'short' => 'yt',
+            'slug' => 'yt',
             'created_at' => now(),
             'updated_at' => now(),
             ],

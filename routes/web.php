@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use Jenssegers\Agent\Agent;
 use Illuminate\Support\Facades\Http;
-
+use App\Http\Controllers\LinkController;  // To allow the usage of LinkController
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -23,6 +23,10 @@ Route::get('/', function () {
 Route::get('/test', function (Request $request) {
     return response()->json(getVisitorInfo($request));
 });
+
+
+Route::get('/{slug}',  [LinkController::class, 'show']   );
+
 
 /**
  * Get visitor information based on request headers and user agent.

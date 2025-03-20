@@ -8,4 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 class Link extends Model
 {
     use HasFactory;
+
+    protected $table = 'links';  // Set the custom table name
 }
