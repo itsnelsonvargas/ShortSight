@@ -49,8 +49,9 @@ class LinkController extends Controller
     public function show($id)
     {
         try {
+         
             //Look for the slug in the database
-            $link = Link::where('short', $id)->firstOrFail();
+            $link = Link::where('slug', $slug)->firstOrFail();
             
             
             //redirect to the URL based on the slug  (Can be viewed in the database)
