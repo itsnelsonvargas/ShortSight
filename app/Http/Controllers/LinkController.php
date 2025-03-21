@@ -22,6 +22,30 @@ class LinkController extends Controller
         // Code to save a new link
     }
 
+    
+    public function storeWithoutUserAccount(Request $request)
+    {
+ 
+        // Create a new Link model instance
+        $link = new Link();
+        
+        // Save the URL passed in the request to the Link model
+        $link->url = $request->url;
+    
+        // Generate a random 7-character slug using md5 and rand()
+        $randomSlug = substr(md5(rand()), 0, 7); // Generate a random slug of 7 characters
+    
+        // Assign the generated slug to the 'short' attribute of the Link model
+        $link->short = $randomSlug;
+    
+        // Save the new Link model instance to the database
+        $link->save();
+    
+        // Return the 'welcome' view with the new random slug
+        return view('welcome', ['newSlug' => $randomSlug, 'submittedUrl' => $request->url]);
+    }
+    
+
     public function show($id)
     {
         try {

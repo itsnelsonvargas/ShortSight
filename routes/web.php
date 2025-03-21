@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use Jenssegers\Agent\Agent;
 use Illuminate\Support\Facades\Http;
+ 
+use App\Http\Controllers\LinkController;//
 
 /*
 |--------------------------------------------------------------------------
@@ -19,6 +21,11 @@ use Illuminate\Support\Facades\Http;
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::post('/', [LinkController::class, 'storeWithoutUserAccount'])->name('createLinkWithoutUserAccount');
+
+ 
+
 
 Route::get('/test', function (Request $request) {
     return response()->json(getVisitorInfo($request));
