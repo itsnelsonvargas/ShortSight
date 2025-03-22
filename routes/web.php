@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use Jenssegers\Agent\Agent;
 use Illuminate\Support\Facades\Http;
+use App\Http\Controllers\LinkController;
+
 
 /*
 |--------------------------------------------------------------------------

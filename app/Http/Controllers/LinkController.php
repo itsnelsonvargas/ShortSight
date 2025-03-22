@@ -25,7 +25,7 @@ class LinkController extends Controller
     
     public function storeWithoutUserAccount(Request $request)
     {
- 
+
         // Create a new Link model instance
         $link = new Link();
         

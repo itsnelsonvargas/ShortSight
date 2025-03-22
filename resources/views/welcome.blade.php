@@ -32,6 +32,10 @@
                                         <strong>{{ env('APP_URL') . '/' . $newSlug  }}</strong>
                                     </a>
                                 </p>
+                                  
+                                <button class="btn btn-primary" onclick="copyToClipboard('{{ env('APP_URL') . '/' . $newSlug }}')"> 
+                                     <i class="fa fa-copy"></i> Copy
+                                </button>
                             </div>
                         @endif
 
