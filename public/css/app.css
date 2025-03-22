@@ -1,0 +1,43 @@
+
+h1, h2, h3, h4, h5{
+    color: #FFEB3B;
+}
+
+body{
+    background-color: #000000  !important;
+    color: #ffffff !important; 
+}
+
+ 
+.form-bg{
+    background-color: #212121 !important;
+}
+
+.yellow-bg{
+    background-color: #FFEB3B !important;
+}
+
+ 
+.btn-outline-yellow {
+    color: #FFEB3B !important; /* Bootstrap primary color */
+    border-color: #FFEB3B !important; /* Border color */
+    background-color: transparent;
+}
+
+.btn-outline-yellow:hover {
+    color: #000 !important; /* White text on hover */
+    background-color:#FFEB3B;  /* Filled primary color on hover */
+    border-color: #FFEB3B; 
+}
+
+.btn-outline-yellow:focus, 
+.btn-outline-yellow:active {
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.5);
+}
+
+.btn-outline-yellow:disabled {
+    color: #0d6efd;
+    background-color: transparent;
+    border-color: #0d6efd;
+    opacity: 0.65;
+}

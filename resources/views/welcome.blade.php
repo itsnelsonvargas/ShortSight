@@ -7,22 +7,38 @@
     
     <div class="container-fluid">
 
+
+
         <div class="row">
-            <div class="col-md-12">
-             
+            <div class="col h-25">
+
+                <h1 class="text-center p-5">URL Shortener</h1>
+
+            </div>
+        </div>
+
+
+        <div class="row">
+            <div class="col-md-12 ">
+                
             </div>
         </div>  
 
+        <hr style="background-color:white;">
 
         <div class="row">
 
-            <div class="col-md-4 col-sm-12"></div>
+            <div class="col-md-4 col-sm-12">
+                <img src="https://placehold.co/100"  style="width:100%;" alt="logo">
+            </div><!--left col-md-4-->
 
             <div class="col-md-4 col-sm-12">
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="text-center">Shorten a URL</h3> 
 
+                <div class="card form-bg">
+
+                    <div class="card-header">
+                        
+                        <h3 class="text-center">Shorten a URL<i class="fa fa-link" aria-hidden="true"></i></h3>  
 
                         <!-- Display the message from the controller --> 
                         @if(isset($newSlug))
@@ -32,9 +48,9 @@
                                         <strong>{{ env('APP_URL') . '/' . $newSlug  }}</strong>
                                     </a>
                                 </p>
-                                  
-                                <button class="btn btn-primary" onclick="copyToClipboard('{{ env('APP_URL') . '/' . $newSlug }}')"> 
-                                     <i class="fa fa-copy"></i> Copy
+                                
+                                <button class="btn  btn-outline-success" onclick="copyToClipboard('{{ env('APP_URL') . '/' . $newSlug }}')"> 
+                                    <i class="fa fa-copy "></i> Copy
                                 </button>
                             </div>
                         @endif
@@ -54,27 +70,22 @@
                                 @enderror 
                             </div> 
                     </div>
-                    
+
                     <div class="card-footer">
-                            <button type="submit" class="btn btn-primary">Shorten</button>
+                            <button type="submit" class="btn btn-outline-yellow  ">Shorten</button>  
                         </form>
                     </div>
 
                 </div><!--card-->
 
-            </div>
-            <div class="col-md-4 col-sm-12"></div>
-
-        </div>
-
-        <div class="row">
-            <div class="col-md-4 col-sm-12"></div>
+            </div><!--center col-md-4-->
 
             <div class="col-md-4 col-sm-12">
 
-                <div class="card">
+                <div class="card form-bg">
                     <div class="card-header">
                         <h3 class="text-center">Login</h3>
+                        <small>To track and manage your shorten link. Contains visitor's </small>
                     </div>
                     <div class="card-body">
                         <form method="POST" action=" ">
@@ -100,14 +111,27 @@
                         </form>
                     </div>
                     <div class="card-footer">
-                        <button type="submit" class="btn btn-primary">Login</button>
+                        <button type="submit" class="btn btn-outline-yellow px-3">Login</button>
                     </div>
                 </div>
+                
+            </div><!--right col-md-4-->
+
+        </div>
+
+        <div class="row">
+            <div class="col-md-4 col-sm-12"></div>
+
+            <div class="col-md-4 col-sm-12">
+
+               
 
             </div>
 
                    
-            <div class="col-md-4 col-sm-12"></div>
+            <div class="col-md-4 col-sm-12">
+
+            </div>
              
 
         </div><!--row-->

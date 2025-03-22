@@ -8,6 +8,10 @@
 
     <title>Laravel</title>
 
+    <!--custom css-->
+    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,600&display=swap" rel="stylesheet" />
@@ -20,7 +24,8 @@
 
 
 <script>
-        //to be added at the footers (before the closing body tag)
+    //to be added at the footers (before the closing body tag)
+    //this function copies the shortened URL to the clipboard
     function copyToClipboard(url) {
         const el = document.createElement('textarea');
         el.value = url;
@@ -29,7 +34,5 @@
         document.execCommand('copy');
         document.body.removeChild(el);
         alert('Copied to clipboard!');
-    }
-
-    
+    } 
 </script>
