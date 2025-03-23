@@ -29,7 +29,7 @@
         <div class="row">
 
             <div class="col-md-4 col-sm-12">
-                <img src="https://placehold.co/100"  style="width:100%;" alt="logo">
+                 
             </div><!--left col-md-4-->
 
             <div class="col-md-4 col-sm-12">
@@ -80,7 +80,9 @@
 
             </div><!--center col-md-4-->
 
-            <div class="col-md-4 col-sm-12">
+            <div class="col-md-2 col-sm-12">
+</div>
+            <div class="col-md-2 col-sm-12">
 
                 <div class="card form-bg">
                     <div class="card-header">
