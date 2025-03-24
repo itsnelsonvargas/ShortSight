@@ -81,7 +81,8 @@
             </div><!--center col-md-4-->
 
             <div class="col-md-2 col-sm-12">
-</div>
+            </div>
+
             <div class="col-md-2 col-sm-12">
 
                 <div class="card form-bg">
@@ -122,16 +123,75 @@
         </div>
 
         <div class="row">
-            <div class="col-md-4 col-sm-12"></div>
+            <div class="col">
+                <h3 class="text-center pt-5 pb-3">Pricing</h3>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3 col-sm-12"></div>
 
-            <div class="col-md-4 col-sm-12">
+            <div class="col-md-2 col-sm-12 my-2">
 
-               
+                <div class="card form-bg unselectable "  >
+                    <img src="..." class="hidden card-img-top" alt="...">
+                    <div class="card-body ">
+                        <h5 class="card-title">No account</h5>
+                        
+                        <p><i class="fa fa-check" aria-hidden="true"></i>
+                        Absolutely for free.</p> 
+
+                        <p><i class="fa fa-check" aria-hidden="true"></i>
+                        Unlimited link shortening.</p>
+
+                        <p><i class="fa fa-check" aria-hidden="true"></i>
+                        User account is not required.</p> 
+
+                        <p><i class="fa fa-times" aria-hidden="true"></i>
+                        No Customization of slug(link)</p>
+
+                        <p><i class="fa fa-times" aria-hidden="true"></i>
+                        No overview of Visitors</p>
+
+                        <p><i class="fa fa-times" aria-hidden="true"></i>
+                        No ownership of the slug(link)</p>
+                        
+
+                        <a href="#" class="btn btn-outline-yellow">Start</a>
+                    </div>
+                </div>
 
             </div>
 
+            <div class="col-md-2 col-sm-12">
+
+                <div class="card form-bg"  >
+                    <img src="..." class="hidden card-img-top" alt="...">
+                    <div class="card-body">
+                        <h5 class="card-title">User account</h5>
+                        <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                        <a href="#" class="btn btn-primary">Go somewhere</a>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="col-md-2 col-sm-12">
+
+                <div class="card form-bg"  >
+                    <img src="..." class="hidden card-img-top" alt="...">
+                    <div class="card-body">
+                        <h5 class="card-title">Premium account</h5>
+                        <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                        <a href="#" class="btn btn-primary">Go somewhere</a>
+                    </div>
+                </div>
+
+            </div>
+
+            
+
                    
-            <div class="col-md-4 col-sm-12">
+            <div class="col-md-3 col-sm-12">
 
             </div>
              
