@@ -63,6 +63,8 @@
                             <div class="form-group
                             @error('url') has-error @enderror">
                                 <label for="url">URL</label>
+                                <i class="fa-solid fa-circle-check check-icon "></i>  
+                            
                                 <input type="text" class="form-control" id="url" name="url" value=" ">
                                 @error('url')
                                     <span class="help-block
@@ -135,7 +137,7 @@
                 <div class="card form-bg unselectable "  >
                     <img src="..." class="hidden card-img-top" alt="...">
                     <div class="card-body ">
-                        <h5 class="card-title">No account</h5>
+                        <h5 class="card-title text-center">No account</h5>
                         
                         <p><i class="fa fa-check" aria-hidden="true"></i>
                         Absolutely for free.</p> 
@@ -199,7 +201,42 @@
         </div><!--row-->
 
     </div><!--container-fluid-->
-    
+
+
+    <script>
+
+         //to be added at the footers (before the closing body tag)
+        //this function copies the shortened URL to the clipboard
+        function copyToClipboard(url) {
+            const el = document.createElement('textarea');
+            el.value = url;
+            document.body.appendChild(el);
+            el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
+            alert('Copied to clipboard!');
+        } 
+
+        
+        $(document).ready(function () {
+    function isValidURL(url) {
+        var pattern = /^(https?:\/\/)?(www\.)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(:\d+)?(\/[^\s]*)?$/;
+        return pattern.test(url);
+    }
+
+    $("#url").on("input", function () {
+        if (isValidURL($(this).val().trim())) {
+            $(".check-icon").remove(); // Removes the checkmark permanently
+        } else {
+            $(".check-icon").fadeOut();
+        }
+    });
+});
+
+    </script>
      
     </body>
+
+
+    
 </html>

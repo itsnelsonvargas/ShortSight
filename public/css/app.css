@@ -56,3 +56,10 @@ body{
 .unselectable{
     user-select: none;
 }
+
+
+.check-icon {
+    display: none !important;
+    color: green;
+    margin-left: 10px;
+}
