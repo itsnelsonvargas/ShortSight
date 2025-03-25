@@ -6,6 +6,9 @@ use Jenssegers\Agent\Agent;
 use Illuminate\Support\Facades\Http;
 use App\Http\Controllers\LinkController;
 
+use Laravel\Socialite\Facades\Socialite;
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 
 /*
 |--------------------------------------------------------------------------
@@ -17,6 +20,36 @@ use App\Http\Controllers\LinkController;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
+
+
+
+
+// Redirect user to Google OAuth page
+Route::get('/auth/google', function () {
+    return Socialite::driver('google')->redirect();
+});
+
+// Handle callback from Google
+Route::get('/auth/google/callback', function () {
+    $googleUser = Socialite::driver('google')->user();
+
+    // Find or create the user in your database
+    $user = User::updateOrCreate(
+        ['email' => $googleUser->getEmail()], // Check if user exists by email
+        [
+            'name' => $googleUser->getName(),
+            'google_id' => $googleUser->getId(),
+            'avatar' => $googleUser->getAvatar(),
+        ]
+    );
+
+    // Log in the user
+    Auth::login($user);
+
+    return redirect('/dashboard'); // Redirect after login
+});
+
+
 
 Route::get('/', function () {
     return view('welcome');
