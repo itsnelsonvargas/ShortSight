@@ -5,6 +5,7 @@ use Illuminate\Http\Request;
 use Jenssegers\Agent\Agent;
 use Illuminate\Support\Facades\Http;
 use App\Http\Controllers\LinkController;
+use App\Http\Controllers\UserController;
 
 use Laravel\Socialite\Facades\Socialite;
 use App\Models\User;
@@ -57,8 +58,8 @@ Route::get('/', function () {
 
 Route::post('/', [LinkController::class, 'storeWithoutUserAccount'])->name('createLinkWithoutUserAccount');
 
- 
-
+Route::get('/registration',[UserController::class, 'store'])->name('registrationForm');
+Route::post('/registration',[])->name('saveUserAccount');
 
 Route::get('/test', function (Request $request) {
     return response()->json(getVisitorInfo($request));
@@ -66,6 +67,10 @@ Route::get('/test', function (Request $request) {
 
 
 Route::get('/{slug}',  [LinkController::class, 'show']   );
+
+
+
+
 
 
 /**
