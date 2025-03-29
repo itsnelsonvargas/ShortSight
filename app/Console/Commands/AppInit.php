@@ -12,7 +12,7 @@ class AppInit extends Command
      *
      * @var string
      */
-    protected $signature = 'app:app-init';
+    protected $signature = 'app:init';
 
     /**
      * The console command description.
