@@ -144,23 +144,6 @@ function getLocationData(string $ipAddress): array {
 
 
 
-Route::get('/auth/google', function () {
-    return Socialite::driver('google')->redirect();
-})->name('google.login');
+Route::get('/auth/google',[SSOController::class,'index'])->name('google.login');
 
-Route::get('/auth/google/callback', function () {
-    $googleUser = Socialite::driver('google')->stateless()->user(); // Client error: `POST https://www.googleapis.com/oauth2/v4/token` resulted in a `400 Bad Request` response: { "error": "invalid_request", "error_description": "Missing required parameter: code" }
- 
-    $user = User::updateOrCreate([
-        'email' => $googleUser->getEmail(),
-    ], [
-        'name' => $googleUser->getName(),
-        'password' => bcrypt('random_password'),
-        'google_id' => $googleUser->getId(),
-    ]);
-
-    Auth::login($user);
-
-    //SSO completed
-    return 'nice'; // Redirect after login
-});
+Route::get('/auth/google/callback', [SSOControlle::class, 'store'])->name('google.callback');
