@@ -15,6 +15,7 @@ class LinkController extends Controller
     public function create()
     {
         // Code to show form to create a new link
+        return view('welcome');
     }
 
     public function store(Request $request)

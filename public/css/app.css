@@ -63,3 +63,10 @@ body{
     color: green;
     margin-left: 10px;
 }
+
+.btn-google{
+    background-color:#FFFFFF !important ;
+    color: #000;
+    width:95%;
+    margin:5px;
+}

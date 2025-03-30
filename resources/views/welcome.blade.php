@@ -86,40 +86,66 @@
             </div>
 
             <div class="col-md-2 col-sm-12">
+                @if(Auth::check())
+                    <p>Welcome, {{ Auth::user()->name }}!</p>
+                    <form action="{{ route('logout') }}" method="POST">
+                        @csrf
+                        @method('GET')
+                        <button type="submit">Logout</button>
+                    </form>
+                @else
+                 
+                    <div class="card form-bg">
+                        <div class="card-header">
+                            <h3 class="text-center">Login</h3>
+                            <small>To track and manage your shorten link. Contains visitor's </small>
+                        </div>
+                        <div class="card-body">
+                            <form method="POST" action=" ">
+                                @csrf
+                                <div class="form-group
+                                @error('email') has-error @enderror">
+                                    <label for="email">Email</label>
+                                    <input type="email" class="form-control" id="email" name="email" value="{{ old('email') }}">
+                                    @error('email')
+                                        <span class="help-block
+                                        text-danger">{{ $message }}</span>
+                                    @enderror   
+                                </div>
+                                <div class="form-group
+                                @error('password') has-error @enderror">
+                                    <label for="password">Password</label>
+                                    <input type="password" class="form-control" id="password" name="password">
+                                    @error('password')
+                                        <span class="help-block
+                                        text-danger">{{ $message }}</span>
+                                    @enderror
+                                </div>
+                            
+                        </div>
 
-                <div class="card form-bg">
-                    <div class="card-header">
-                        <h3 class="text-center">Login</h3>
-                        <small>To track and manage your shorten link. Contains visitor's </small>
-                    </div>
-                    <div class="card-body">
-                        <form method="POST" action=" ">
+                        
+                        <div class="card-footer"> 
+                            <button type="submit" class="btn btn-outline-yellow px-3">Login</button>
+                            </form>
+                        </div>
+
+                        <hr> 
+                        
+                        <form action="{{ route('google.login') }}" method="GET">
                             @csrf
-                            <div class="form-group
-                            @error('email') has-error @enderror">
-                                <label for="email">Email</label>
-                                <input type="email" class="form-control" id="email" name="email" value="{{ old('email') }}">
-                                @error('email')
-                                    <span class="help-block
-                                    text-danger">{{ $message }}</span>
-                                @enderror   
-                            </div>
-                            <div class="form-group
-                            @error('password') has-error @enderror">
-                                <label for="password">Password</label>
-                                <input type="password" class="form-control" id="password" name="password">
-                                @error('password')
-                                    <span class="help-block
-                                    text-danger">{{ $message }}</span>
-                                @enderror
-                            </div>
+                            <button type="submit" class="btn btn-google">
+                                <img src="https://www.gstatic.com/marketing-cms/assets/images/d5/dc/cfe9ce8b4425b410b49b7f2dd3f3/g.webp=s96-fcrop64=1,00000000ffffffff-rw"
+                                    style="height:25px !important;"
+                                    alt="Google Logo">
+                                Sign in with Google
+                            </button>
                         </form>
+
+                        
                     </div>
-                    <div class="card-footer">
-                        <button type="submit" class="btn btn-outline-yellow px-3">Login</button>
-                    </div>
-                </div>
                 
+                @endif
             </div><!--right col-md-4-->
 
         </div>
