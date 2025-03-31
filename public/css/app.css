@@ -70,3 +70,26 @@ body{
     width:95%;
     margin:5px;
 }
+
+
+
+.hr-or {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 20px 0;
+}
+
+.hr-or::before,
+.hr-or::after {
+    content: "";
+    flex: 1;
+    border-bottom: 1px solid #ccc;
+    margin: 5px;
+}
+
+.hr-or span {
+    padding: 0 10px;
+    font-weight: bold;
+    color: #555;
+}

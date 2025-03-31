@@ -129,8 +129,9 @@
                             <button type="submit" class="btn btn-outline-yellow px-3">Login</button>
                             </form>
                         </div>
-
-                        <hr> 
+ 
+                        
+                        <div class="hr-or"><span>or</span></div>
                         
                         <form action="{{ route('google.login') }}" method="GET">
                             @csrf
