@@ -143,6 +143,14 @@
                             </button>
                         </form>
 
+                        <form action="#" method="GET">
+                            @csrf
+                            <button type="submit" class="btn btn-facebook">
+                                <i class="fa-brands fa-facebook-f px-1" ></i>
+                                Sign in with Facebook
+                            </button>
+                        </form>
+
                         
                     </div>
                 
