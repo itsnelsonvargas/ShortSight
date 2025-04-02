@@ -88,6 +88,8 @@
             <div class="col-md-2 col-sm-12">
                 @if(Auth::check())
                     <p>Welcome, {{ Auth::user()->name }}!</p>
+                    <small class="text-muted">You are logged in using your {{ Auth::user()->email; }}</small>
+                    <hr>
                     <form action="{{ route('logout') }}" method="POST">
                         @csrf
                         @method('GET')
