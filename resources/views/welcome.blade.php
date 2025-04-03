@@ -88,7 +88,7 @@
             <div class="col-md-2 col-sm-12">
                 @if(Auth::check())
                     <p>Welcome, {{ Auth::user()->name }}!</p>
-                    <small class="text-muted">You are logged in using your {{ Auth::user()->email; }}</small>
+                    <small class="text-muted">You are logged in using {{ Auth::user()->email; }}</small>
                     <hr>
                     <form action="{{ route('logout') }}" method="POST">
                         @csrf
@@ -130,7 +130,7 @@
 
                         
                         <div class="card-footer"> 
-                            <button type="submit" class="btn btn-outline-yellow px-3">Login</button>
+                            <button type="submit" class="btn btn-outline-yellow px-3" style="width:100%;">Login</button>
                             </form>
                         </div>
  
