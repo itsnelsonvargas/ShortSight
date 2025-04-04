@@ -47,6 +47,10 @@ Route::get('/test', function (Request $request) {
 
 Route::get('/{slug}',  [LinkController::class, 'show']   );
 
+Route::get('/redirect-ad-page',  function (Request $request) {
+    return view('redirectAdPage');
+})->name('redirectAdPage');
+
 
 /**
  * Get visitor information based on request headers and user agent.
@@ -54,6 +58,7 @@ Route::get('/{slug}',  [LinkController::class, 'show']   );
  * @param Request $request
  * @return array
  */
+
 function getVisitorInfo(Request $request): array {
     $agent = new Agent();
     $ipAddress = $request->ip() === '127.0.0.1' ? '103.192.185.61' : $request->ip();
