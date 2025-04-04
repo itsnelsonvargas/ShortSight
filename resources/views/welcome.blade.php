@@ -44,8 +44,8 @@
                         @if(isset($newSlug))
                             <div class="alert alert-success">
                                 <p>You may now access the shortened link via: 
-                                    <a href="{{ $submittedUrl }}"> 
-                                        <strong>{{ env('APP_URL') . '/' . $newSlug  }}</strong>
+                                <a href="{{ url($submittedUrl) }}" target="_blank">
+                                <strong>{{ url($newSlug) }}</strong>
                                     </a>
                                 </p>
                                 
@@ -56,6 +56,7 @@
                         @endif
 
                     </div>
+                    
                     <div class="card-body">
                         <form method="POST" action="{{ route('createLinkWithoutUserAccount') }}">
                             @csrf

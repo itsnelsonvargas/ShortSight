@@ -44,8 +44,8 @@ class LinkController extends Controller
             $randomSlug = substr(md5(rand()), 0, 7); //
         }
 
-        // Assign the generated slug to the 'short' attribute of the Link model
-        $link->short = $randomSlug;
+        // Assign the generated slug to the 'slug' attribute of the Link model
+        $link->slug = $randomSlug;
     
         // Save the new Link model instance to the database
         $link->save();
