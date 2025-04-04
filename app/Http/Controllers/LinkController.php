@@ -36,8 +36,10 @@ class LinkController extends Controller
         // Generate a random 7-character slug using md5 and rand()
         $randomSlug = substr(md5(rand()), 0, 7); // Generate a random slug of 7 characters
     
+        $randomSlugB = substr(md5(rand()), 0, 3) . '-' . substr(md5(rand()), 3, 3); // Generate a random slug of 7 characters with a hyphen
+        
         // Check if the generated slug already exists in the database
-        while (Link::where('short', $randomSlug)->exists()) {
+        while (Link::where('slug', $randomSlug)->exists()) {
             // If the generated slug already exists in the database, generate a new one
             $randomSlug = substr(md5(rand()), 0, 7); //
         }
