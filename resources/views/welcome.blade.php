@@ -47,8 +47,8 @@
                                 <a href="{{ url($submittedUrl) }}" target="_blank">
                                 <strong>{{ url($newSlug) }}</strong>
                                     </a>
-                                </p>
-                                
+                                </p> 
+
                                 <button class="btn  btn-outline-success" onclick="copyToClipboard('{{ env('APP_URL') . '/' . $newSlug }}')"> 
                                     <i class="fa fa-copy "></i> Copy
                                 </button>
@@ -65,13 +65,67 @@
                             @error('url') has-error @enderror">
                                 <label for="url">URL</label>
                                 <i class="fa-solid fa-circle-check check-icon "></i>  
-                            
+
+                                
+                                
                                 <input type="text" class="form-control" id="url" name="url" value=" ">
                                 @error('url')
                                     <span class="help-block
                                     text-danger">{{ $message }}</span>
                                 @enderror 
                             </div> 
+
+                            <div class="form-group">
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="customSlug" name="customSlug" value="1" checked>
+                                    <label class="form-check-label" for="customSlug">Use custom slug</label>
+                                </div>
+                                <input type="text" class="form-control mt-2" id="customSlugInput" name="customSlugInput"
+                                    @if(Auth::check())
+                                        placeholder="Enter custom slug" disabled
+                                    @else
+                                        placeholder="For signed-in users only" disabled
+                                    @endif>
+                            </div>
+
+                            <div class="form-group mt-3" id="formatOptions" style="display:none;">
+                                <label for="format">Slug Format:</label>
+                                <div class="form-check">
+                                    <input type="radio" class="form-check-input" id="random7" name="format" value="random7" checked>
+                                    <label class="form-check-label" for="random7">
+                                        Random 7 characters ( <span   class="text-muted">Ex: {{ env('APP_URL') }}/A1B2C3D</span>)
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input type="radio" class="form-check-input" id="random6Hyphen" name="format" value="random6Hyphen">
+                                    <label class="form-check-label" for="random6Hyphen">
+                                        Random 6 characters with hyphen( <span   class="text-muted">Ex: {{ env('APP_URL') }}/ABC-123</span>)
+                                    </label>
+                                </div>
+                            </div>
+
+                            <script>
+                                document.addEventListener('DOMContentLoaded', function () {
+                                    const customSlugCheckbox = document.getElementById('customSlug');
+                                    const customSlugInput = document.getElementById('customSlugInput');
+                                    const formatOptions = document.getElementById('formatOptions');
+                                    
+                                    customSlugCheckbox.addEventListener('change', function () {
+                                        
+                                        if (this.checked) {
+                                            customSlugInput.disabled = false;
+                                            customSlugInput.style.display = "block";
+                                            formatOptions.style.display = 'none';
+                                            customSlugCheckbox.disabled = false; // stay enabled
+                                        } else {
+                                            customSlugInput.disabled = true;
+                                            customSlugInput.style.display = "none";
+                                            formatOptions.style.display = 'block';
+                                            customSlugCheckbox.disabled = false; // stay enabled
+                                        }
+                                    });
+                                });
+                            </script>
                     </div>
 
                     <div class="card-footer">
