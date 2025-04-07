@@ -77,18 +77,29 @@
 
                             <div class="form-group">
                                 <div class="form-check">
-                                    <input type="checkbox" class="form-check-input" id="customSlug" name="customSlug" value="1" checked>
+                                    <input type="checkbox" class="form-check-input" id="customSlug" name="customSlug" value="1"
+                                        @if(Auth::check())
+                                          checked
+                                        @endif>
                                     <label class="form-check-label" for="customSlug">Use custom slug</label>
                                 </div>
                                 <input type="text" class="form-control mt-2" id="customSlugInput" name="customSlugInput"
                                     @if(Auth::check())
-                                        placeholder="Enter custom slug" disabled
+                                        placeholder="Enter custom slug"
+                                        style="display:block;">
                                     @else
                                         placeholder="For signed-in users only" disabled
-                                    @endif>
+                                        style="display:none;">
+                                    @endif 
+                                    
                             </div>
 
-                            <div class="form-group mt-3" id="formatOptions" style="display:none;">
+                            <div class="form-group mt-3" id="formatOptions" 
+                                @if(Auth::check())
+                                    style="display:none;">
+                                @else
+                                    style="display:block;">
+                                @endif 
                                 <label for="format">Slug Format:</label>
                                 <div class="form-check">
                                     <input type="radio" class="form-check-input" id="random7" name="format" value="random7" checked>
@@ -112,17 +123,33 @@
                                     
                                     customSlugCheckbox.addEventListener('change', function () {
                                         
+                                        // Handle the toggle for using a custom slug
                                         if (this.checked) {
-                                            customSlugInput.disabled = false;
+                                            // If the user is authenticated
+                                            @if(Auth::check())
+                                                // Enable the custom slug input
+                                                customSlugInput.disabled = false;
+                                            @else
+                                                // Otherwise, disable it
+                                                customSlugInput.disabled = true;
+                                            @endif
+
+                                            // Show the custom slug input field
                                             customSlugInput.style.display = "block";
-                                            formatOptions.style.display = 'none';
-                                            customSlugCheckbox.disabled = false; // stay enabled
+                                            
+                                            // Hide the format options
+                                            formatOptions.style.display = "none";
                                         } else {
+                                            // Always disable the input when checkbox is unchecked
                                             customSlugInput.disabled = true;
+
+                                            // Hide the custom slug input field
                                             customSlugInput.style.display = "none";
-                                            formatOptions.style.display = 'block';
-                                            customSlugCheckbox.disabled = false; // stay enabled
+
+                                            // Show the format options
+                                            formatOptions.style.display = "block";
                                         }
+
                                     });
                                 });
                             </script>
@@ -313,19 +340,19 @@
 
         
         $(document).ready(function () {
-    function isValidURL(url) {
-        var pattern = /^(https?:\/\/)?(www\.)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(:\d+)?(\/[^\s]*)?$/;
-        return pattern.test(url);
-    }
+            function isValidURL(url) {
+                var pattern = /^(https?:\/\/)?(www\.)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(:\d+)?(\/[^\s]*)?$/;
+                return pattern.test(url);
+            }
 
-    $("#url").on("input", function () {
-        if (isValidURL($(this).val().trim())) {
-            $(".check-icon").remove(); // Removes the checkmark permanently
-        } else {
-            $(".check-icon").fadeOut();
-        }
-    });
-});
+            $("#url").on("input", function () {
+                if (isValidURL($(this).val().trim())) {
+                    $(".check-icon").remove(); // Removes the checkmark permanently
+                } else {
+                    $(".check-icon").fadeOut();
+                }
+            });
+        });
 
     </script>
      
