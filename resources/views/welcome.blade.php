@@ -2,12 +2,12 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
         <x:head></x:head>
+        <script src="{{ url('/js/home.js') }}"></script>
     </head>
     <body class="antialiased">
     
     <div class="container-fluid">
-
-
+ 
 
         <div class="row">
             <div class="col h-25">
@@ -324,37 +324,7 @@
     </div><!--container-fluid-->
 
 
-    <script>
-
-         //to be added at the footers (before the closing body tag)
-        //this function copies the shortened URL to the clipboard
-        function copyToClipboard(url) {
-            const el = document.createElement('textarea');
-            el.value = url;
-            document.body.appendChild(el);
-            el.select();
-            document.execCommand('copy');
-            document.body.removeChild(el);
-            alert('Copied to clipboard!');
-        } 
-
-        
-        $(document).ready(function () {
-            function isValidURL(url) {
-                var pattern = /^(https?:\/\/)?(www\.)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(:\d+)?(\/[^\s]*)?$/;
-                return pattern.test(url);
-            }
-
-            $("#url").on("input", function () {
-                if (isValidURL($(this).val().trim())) {
-                    $(".check-icon").remove(); // Removes the checkmark permanently
-                } else {
-                    $(".check-icon").fadeOut();
-                }
-            });
-        });
-
-    </script>
+  
      
     </body>
 
