@@ -72,6 +72,18 @@ class LinkController extends Controller
           
     }
 
+    public function checkSlug(Request $request)
+    {   
+        
+        //Get the slug to validate
+        $slug = $request->input('slug');
+
+        //Check if the slug is already used
+        $exists = \App\Models\Link::where('slug', $slug)->exists(); // Replace `Post` with your model
+       
+        return response()->json(['exists' => $exists]);
+    }
+
     public function edit($id)
     {
         // Code to show form to edit a specific link

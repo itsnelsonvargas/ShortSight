@@ -1,7 +1,5 @@
 <?php
  //SSO
-
-
  
 
 use Illuminate\Support\Facades\Route;
@@ -46,6 +44,9 @@ Route::get('/test', function (Request $request) {
 
 
 Route::get('/{slug}',  [LinkController::class, 'show']   );
+
+Route::get('/check-slug',  [LinkController::class, 'checkSlug']   )
+    ->name('checkSlug');
 
 Route::get('/redirect-ad-page',  function (Request $request) {
     return view('redirectAdPage');

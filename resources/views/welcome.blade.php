@@ -2,7 +2,11 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
         <x:head></x:head>
-        <script src="{{ url('/js/home.js') }}"></script>
+         
+        <script>
+            const checkSlugUrl = '{{ route("checkSlug") }}';
+        </script>
+        <script src="{{ asset('js/home.js') }}"></script>
     </head>
     <body class="antialiased">
     
@@ -66,7 +70,7 @@
                                 <label for="url">URL</label>
                                 <i class="fa-solid fa-circle-check check-icon "></i>  
 
-                                
+                                <i id="logo-check-slug" class="fa fa-spinner" aria-hidden="true"></i>
                                 
                                 <input type="text" class="form-control" id="url" name="url" value=" ">
                                 @error('url')
@@ -76,6 +80,7 @@
                             </div> 
 
                             <div class="form-group">
+
                                 <div class="form-check">
                                     <input type="checkbox" class="form-check-input" id="customSlug" name="customSlug" value="1"
                                         @if(Auth::check())
@@ -83,6 +88,10 @@
                                         @endif>
                                     <label class="form-check-label" for="customSlug">Use custom slug</label>
                                 </div>
+                                
+                                <small id="slug-status"></small>
+                                 
+                            
                                 <input type="text" class="form-control mt-2" id="customSlugInput" name="customSlugInput"
                                     @if(Auth::check())
                                         placeholder="Enter custom slug"
