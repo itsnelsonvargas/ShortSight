@@ -4,7 +4,7 @@
         <x:head></x:head>
     </head>
     <body class="antialiased">
-    
+
     <div class="container-fluid">
 
         <div class="row">
@@ -19,7 +19,7 @@
 
         <script>
             let countdown = 5; // Countdown in seconds
-            const redirectURL = "https://example.com"; // Target URL
+            const redirectURL = "{{ env('APP_URL') }}" + "/" + 'slug-to-be-inserted-here'; // Target URL
 
             function startCountdown() {
                 const countdownElement = document.getElementById("countdown");
@@ -38,5 +38,5 @@
     </body>
 
 
-    
+
 </html>
