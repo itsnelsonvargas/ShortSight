@@ -45,7 +45,7 @@ Route::get('/test', function (Request $request) {
 
 Route::get('/{slug}',  [LinkController::class, 'show']   );
 
-Route::get('/check-slug',  [LinkController::class, 'checkSlug']   )
+Route::post('/check-slug',  [LinkController::class, 'checkSlug'] )
     ->name('checkSlug');
 
 Route::get('/redirect-ad-page',  function (Request $request) {

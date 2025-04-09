@@ -30,15 +30,24 @@ $(document).ready(function () {
 
 
    $('#customSlugInput').on('input', function () {
+ 
         let slug = $(this).val().trim();
 
         if (slug.length === 0) return;
 
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
+
         $.ajax({
             url: checkSlugUrl, // URL to your slug checking endpoint. Declared from the Welcome.blade.php
-            type: 'GET',
+            type: 'POST',
             data: { slug: slug },
+            
             beforeSend: function () {
+                alert(checkSlugUrl);
                 $('#logo-check-slug').show(); // Show spinner
                 $('#slug-status').text('Checking...');
             },

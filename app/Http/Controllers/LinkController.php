@@ -62,7 +62,6 @@ class LinkController extends Controller
             //Look for the slug in the database
             $link = Link::where('slug', $slug)->firstOrFail();
             
-            
             //redirect to the URL based on the slug  (Can be viewed in the database)
             return redirect($link->url); 
         } catch (\Exception $e) {
@@ -73,10 +72,10 @@ class LinkController extends Controller
     }
 
     public function checkSlug(Request $request)
-    {   
-        
+    {    
         //Get the slug to validate
         $slug = $request->input('slug');
+        dd($slug);
 
         //Check if the slug is already used
         $exists = \App\Models\Link::where('slug', $slug)->exists(); // Replace `Post` with your model
