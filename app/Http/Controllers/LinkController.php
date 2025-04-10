@@ -75,11 +75,12 @@ class LinkController extends Controller
     {    
         //Get the slug to validate
         $slug = $request->input('slug');
-        dd($slug);
+       
 
         //Check if the slug is already used
         $exists = \App\Models\Link::where('slug', $slug)->exists(); // Replace `Post` with your model
        
+        dd(  $exists) ;
         return response()->json(['exists' => $exists]);
     }
 
@@ -96,5 +97,10 @@ class LinkController extends Controller
     public function destroy($id)
     {
         // Code to delete a specific link
+    }
+
+    public function test()
+    {
+        return view('test');
     }
 }

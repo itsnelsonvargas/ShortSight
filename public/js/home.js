@@ -40,7 +40,7 @@ $(document).ready(function () {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             }
         });
-
+         
         $.ajax({
             url: checkSlugUrl, // URL to your slug checking endpoint. Declared from the Welcome.blade.php
             type: 'POST',

@@ -38,9 +38,8 @@ Route::get('/auth/google', [SSOController::class,'index'])->name('google.login')
 
 Route::get('/auth/google/callback', [SSOController::class, 'store'])->name('google.callback');
 
-Route::get('/test', function (Request $request) {
-    return response()->json(getVisitorInfo($request));
-});
+Route::get('/test',  [  LinkController::class, 'test'] );
+
 
 
 Route::get('/{slug}',  [LinkController::class, 'show']   );
