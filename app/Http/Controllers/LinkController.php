@@ -78,9 +78,9 @@ class LinkController extends Controller
        
 
         //Check if the slug is already used
-        $exists = \App\Models\Link::where('slug', $slug)->exists(); // Replace `Post` with your model
+        $exists = \App\Models\Link::where('slug', $slug)->exists();  
        
-        dd(  $exists) ;
+        //dd(  $exists) ;
         return response()->json(['exists' => $exists]);
     }
 

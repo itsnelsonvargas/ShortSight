@@ -74,10 +74,9 @@
                             @method('POST')
                             <div class="form-group
                             @error('url') has-error @enderror">
-                                <label for="url">URL</label>
-                                <i class="fa-solid fa-circle-check check-icon "></i>  
+                                <label for="url">URL</label> 
 
-                                <i id="logo-check-slug" class="fa fa-spinner" aria-hidden="true"></i>
+                                
                                 
                                 <input type="text" class="form-control" id="url" name="url" value=" ">
                                 @error('url')

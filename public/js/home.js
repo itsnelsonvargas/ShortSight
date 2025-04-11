@@ -34,6 +34,21 @@ $(document).ready(function () {
         let slug = $(this).val().trim();
 
         if (slug.length === 0) return;
+        
+        if (slug.includes(' ')) {
+            $('#slug-status').text('Slug cannot contain spaces.').css('color', 'red');
+            return;
+        }
+
+        const MIN_LENGTH = 6; // Minimum length for slug
+        if(slug.length < MIN_LENGTH) {
+            
+            let neededChars = MIN_LENGTH - slug.length;
+            $('#slug-status').text(`Slug must be at least ${MIN_LENGTH} characters long. ${neededChars} more character(s) needed.`).css('color', 'red');
+            
+           
+           return;
+        }
 
         $.ajaxSetup({
             headers: {
@@ -46,16 +61,18 @@ $(document).ready(function () {
             type: 'POST',
             data: { slug: slug },
             
-            beforeSend: function () {
-                alert(checkSlugUrl);
-                $('#logo-check-slug').show(); // Show spinner
-                $('#slug-status').text('Checking...');
+            beforeSend: function () { 
+               
+                let spinnerLogo = '<i id="logo-check-slug" class="fa fa-spinner fa-spin" aria-hidden="true"></i>'
+                $('#slug-status').html(spinnerLogo + ' Checking...');
             },
             success: function (response) {
-                if (response.exists) {
+                if (response.exists) { 
                     $('#slug-status').text('Slug already exists').css('color', 'red');
+
                 } else {
-                    $('#slug-status').text('Slug is available').css('color', 'green');
+                    let checkInCircle = '<i class="fa-solid fa-circle-check"></i>';
+                    $('#slug-status').html( checkInCircle + ' Slug is available').css('color', 'green');
                 }
             },
             error: function () {
