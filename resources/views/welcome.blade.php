@@ -72,6 +72,8 @@
                         <form method="POST" action="{{ route('createLinkWithoutUserAccount') }}">
                             @csrf
                             @method('POST')
+
+                            <input type="text" name="test" value="asdsa" >
                             <div class="form-group
                             @error('url') has-error @enderror">
                                 <label for="url">URL</label> 

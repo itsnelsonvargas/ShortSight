@@ -26,32 +26,48 @@ class LinkController extends Controller
     
     public function storeWithoutUserAccount(Request $request)
     {
-
+       // dd($request->all());
+         
         // Create a new Link model instance
         $link = new Link();
         
         // Save the URL passed in the request to the Link model
         $link->url = $request->url;
     
-        // Generate a random 7-character slug using md5 and rand()
-        $randomSlug = substr(md5(rand()), 0, 7); // Generate a random slug of 7 characters
-    
-        $randomSlugB = substr(md5(rand()), 0, 3) . '-' . substr(md5(rand()), 3, 3); // Generate a random slug of 7 characters with a hyphen
-        
-        // Check if the generated slug already exists in the database
-        while (Link::where('slug', $randomSlug)->exists()) {
-            // If the generated slug already exists in the database, generate a new one
-            $randomSlug = substr(md5(rand()), 0, 7); //
+        $slug ="";
+        if(isset($request->customSlug)){ 
+            //if User select custom slug
+            $slug = $request->customSlugInput;
         }
+        else
+        {
+         
+            // Generate a random 7-character slug using md5 and rand()
+            $randomSlug = substr(md5(rand()), 0, 7); // Generate a random slug of 7 characters
+        
+            $randomSlugB = substr(md5(rand()), 0, 3) . '-' . substr(md5(rand()), 3, 3); // Generate a random slug of 7 characters with a hyphen
+       
+            // Check if the generated slug already exists in the database
+            while (Link::where('slug', $randomSlug)->exists()) {
+                // If the generated slug already exists in the database, generate a new one
+                $randomSlug = substr(md5(rand()), 0, 7); //
+            }
+
+            $slug = $randomSlug;
+        }
+   
+       
+        
+        
 
         // Assign the generated slug to the 'short' attribute of the Link model
-        $link->slug = $randomSlug;
+        $link->slug = $slug;
     
         // Save the new Link model instance to the database
         $link->save();
     
         // Return the 'welcome' view with the new random slug
-        return view('welcome', ['newSlug' => $randomSlug, 'submittedUrl' => $request->url]);
+        return view('welcome', ['newSlug' => $slug, 'submittedUrl' => $request->url]);
     }
     
 
