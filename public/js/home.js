@@ -29,8 +29,10 @@ $(document).ready(function () {
    });
 
 
+
    $('#customSlugInput').on('input', function () {
  
+        const submitButton = $('#submitButton');
         let slug = $(this).val().trim();
 
         if (slug.length === 0) return;

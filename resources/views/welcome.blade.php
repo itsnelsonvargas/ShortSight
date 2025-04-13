@@ -73,14 +73,14 @@
                             @csrf
                             @method('POST')
 
-                            <input type="text" name="test" value="asdsa" >
+                            
                             <div class="form-group
                             @error('url') has-error @enderror">
                                 <label for="url">URL</label> 
 
                                 
                                 
-                                <input type="text" class="form-control" id="url" name="url" value=" ">
+                                <input type="text" class="form-control" id="url" name="url" required>
                                 @error('url')
                                     <span class="help-block
                                     text-danger">{{ $message }}</span>
@@ -173,7 +173,7 @@
                     </div>
 
                     <div class="card-footer">
-                            <button type="submit" class="btn btn-outline-yellow  ">Shorten</button>  
+                            <button type="submit" id="submitButton" class="btn btn-outline-yellow  ">Shorten</button>  
                         </form>
                     </div>
 
