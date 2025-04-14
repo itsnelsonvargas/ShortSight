@@ -119,4 +119,13 @@ class LinkController extends Controller
     {
         return view('test');
     }
+
+
+    public function testQR()
+    {
+ 
+        $data = 'https://facebook.com';
+        return view('generateQR', compact('data'));
+ 
+    }
 }

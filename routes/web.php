@@ -40,6 +40,7 @@ Route::get('/auth/google/callback', [SSOController::class, 'store'])->name('goog
 
 Route::get('/test',  [  LinkController::class, 'test'] );
 
+Route::get('/qr',  [  LinkController::class, 'testQR'] );
 
 
 Route::get('/{slug}',  [LinkController::class, 'show']   );
