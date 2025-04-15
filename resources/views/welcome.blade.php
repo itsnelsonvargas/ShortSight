@@ -54,10 +54,29 @@
                         
                         <!-- Display the message from the controller --> 
                         @if(isset($data['newSlug']))
-                            <div class="alert alert-light text-center">
-                                {!! QrCode::size(100)->generate('newSlug') !!}
-                            </div>
                         
+                            <div class="alert alert-light text-center">
+                                {!! QrCode::format('svg')->size(200)->generate($data['newSlug']) !!}
+
+
+                                @php
+                                    $svgQrCode = QrCode::format('svg')->size(200)->generate($data['newSlug']);
+                                    $svgBase64 = base64_encode($svgQrCode);
+                                @endphp
+
+                                <a href="data:image/svg+xml;base64,{{ $svgBase64 }}" download="qrcode.svg">
+                                    <button class="btn btn-outline-success">
+                                        <i class="fa fa-download"></i> Download QR
+                                    </button>
+                                </a>
+
+                            </div>
+
+                            <a href="{{ route('downloadPng', ['slug' => $data['newSlug']]) }}">
+                                <button class="btn btn-outline-success">
+                                    <i class="fa fa-download"></i> Download QR PNG
+                                </button>
+                            </a>
 
                         
                             <div class="alert alert-success">

@@ -76,6 +76,14 @@ class LinkController extends Controller
         return view('welcome', compact('data'));
     }
     
+    public function downloadPng($slug)
+    {
+        $png = QrCode::format('png')->size(200)->generate($slug);
+
+        return response($png, 200)
+        ->header('Content-Type', 'image/png')
+        ->header('Content-Disposition', 'attachment; filename="qrcode.png"');
+    }
 
     public function show($id)
     {
