@@ -51,18 +51,26 @@
                         
                         <h3 class="text-center">Shorten a URL<i class="fa fa-link" aria-hidden="true"></i></h3>  
 
+                        
                         <!-- Display the message from the controller --> 
-                        @if(isset($newSlug))
+                        @if(isset($data['newSlug']))
+                            <div class="alert alert-light text-center">
+                                {!! QrCode::size(100)->generate('newSlug') !!}
+                            </div>
+                        
+
+                        
                             <div class="alert alert-success">
                                 <p>You may now access the shortened link via: 
-                                <a href="{{ url($submittedUrl) }}" target="_blank">
-                                <strong>{{ url($newSlug) }}</strong>
+                                <a href="{{ url($data['submittedUrl']) }}" target="_blank">
+                                <strong>{{ url($data['newSlug']) }}</strong>
                                     </a>
                                 </p> 
 
-                                <button class="btn  btn-outline-success" onclick="copyToClipboard('{{ env('APP_URL') . '/' . $newSlug }}')"> 
-                                    <i class="fa fa-copy "></i> Copy
+                                <button class="btn btn-outline-success" onclick="copyToClipboard('{{ env('APP_URL') . '/' . $data['newSlug'] }}')"> 
+                                    <i class="fa fa-copy"></i> Copy
                                 </button>
+
                             </div>
                         @endif
 

@@ -65,9 +65,15 @@ class LinkController extends Controller
     
         // Save the new Link model instance to the database
         $link->save();
+
+        $data = [
+            'newSlug' => $slug,
+            'submittedUrl' => $request->url,
+            'qrCode'   => '',
+        ];  
     
         // Return the 'welcome' view with the new random slug
-        return view('welcome', ['newSlug' => $slug, 'submittedUrl' => $request->url]);
+        return view('welcome', compact('data'));
     }
     
 

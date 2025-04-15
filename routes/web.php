@@ -28,15 +28,20 @@ use App\Http\Controllers\SSOController;
  
 
 
-Route::get('/',[LinkController::class, 'create'])->name('home');
+Route::get('/',[LinkController::class, 'create'])
+    ->name('home');
 
-Route::post('/', [LinkController::class, 'storeWithoutUserAccount'])->name('createLinkWithoutUserAccount');
+Route::post('/', [LinkController::class, 'storeWithoutUserAccount'])
+    ->name('createLinkWithoutUserAccount');
 
-Route::get('/logout', [AuthController::class,'logout'])->name('logout');
+Route::get('/logout', [AuthController::class,'logout'])
+    ->name('logout');
 
-Route::get('/auth/google', [SSOController::class,'index'])->name('google.login');
+Route::get('/auth/google', [SSOController::class,'index'])
+    ->name('google.login');
 
-Route::get('/auth/google/callback', [SSOController::class, 'store'])->name('google.callback');
+Route::get('/auth/google/callback', [SSOController::class, 'store'])
+    ->name('google.callback');
 
 Route::get('/test',  [  LinkController::class, 'test'] );
 
