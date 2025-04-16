@@ -25,8 +25,9 @@ use App\Http\Controllers\SSOController;
 */
 
 
-Route::get('/testqrr',[LinkController::class, 'downloadPng'])
-->name('downloadPng');
+Route::get('/testqrr/{slug}', [LinkController::class, 'downloadPng'])
+    ->name('downloadPng');
+
 
 
 Route::get('/',[LinkController::class, 'create'])

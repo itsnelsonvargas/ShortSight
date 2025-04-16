@@ -56,41 +56,25 @@
                         @if(isset($data['newSlug']))
                         
                             <div class="alert alert-light text-center">
-                                {!! QrCode::format('svg')->size(200)->generate($data['newSlug']) !!}
 
+                                {!! QrCode::format('svg')->size(150)->generate($data['newSlug']) !!} 
 
-                                @php
-                                    $svgQrCode = QrCode::format('svg')->size(200)->generate($data['newSlug']);
-                                    $svgBase64 = base64_encode($svgQrCode);
-                                @endphp
-
-                                <a href="data:image/svg+xml;base64,{{ $svgBase64 }}" download="qrcode.svg">
-                                    <button class="btn btn-outline-success">
-                                        <i class="fa fa-download"></i> Download QR
+                                <p>You may now access the shortened link via: 
+                                    <a href="{{ url($data['submittedUrl']) }}" target="_blank">
+                                        <strong>{{ url($data['newSlug']) }}</strong>  
+                                    </a>
+                                    <button class="btn  ss" onclick="copyToClipboard('{{ env('APP_URL') . '/' . $data['newSlug'] }}')"
+                                        style="background-color:transparent; border:none;"> 
+                                        <i class="fa fa-copy"></i> Copy
                                     </button>
-                                </a>
-
+                                </p>   
+                                
                             </div>
 
-                            <a href="{{ route('downloadPng', ['slug' => $data['newSlug']]) }}">
-                                <button class="btn btn-outline-success">
-                                    <i class="fa fa-download"></i> Download QR PNG
-                                </button>
-                            </a>
+                            
 
                         
-                            <div class="alert alert-success">
-                                <p>You may now access the shortened link via: 
-                                <a href="{{ url($data['submittedUrl']) }}" target="_blank">
-                                <strong>{{ url($data['newSlug']) }}</strong>
-                                    </a>
-                                </p> 
-
-                                <button class="btn btn-outline-success" onclick="copyToClipboard('{{ env('APP_URL') . '/' . $data['newSlug'] }}')"> 
-                                    <i class="fa fa-copy"></i> Copy
-                                </button>
-
-                            </div>
+                           
                         @endif
 
                     </div>
