@@ -54,7 +54,7 @@ class LinkController extends Controller
         $data = [
             'newSlug' => $slug,
             'submittedUrl' => $request->url,
-            'qrCode' => '', // Optional: add QR generation here
+             
         ];
 
         return view('welcome', compact('data'));
