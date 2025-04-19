@@ -258,7 +258,7 @@
                             </button>
                         </form>
 
-                        <form action="#" method="GET">
+                        <form action="{{ route('facebook.login') }}" method="GET">
                             @csrf
                             <button type="submit" class="btn btn-facebook">
                                 <i class="fa-brands fa-facebook-f px-1" ></i>

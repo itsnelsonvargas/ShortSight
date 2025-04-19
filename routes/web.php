@@ -45,6 +45,37 @@ Route::get('/auth/google', [SSOController::class,'index'])
 Route::get('/auth/google/callback', [SSOController::class, 'store'])
     ->name('google.callback');
 
+
+
+
+Route::get('/login/facebook', function () {
+        return Socialite::driver('facebook')->redirect();
+    })->name('facebook.login');
+    
+Route::get('/auth/facebook/callback', function () {
+        $facebookUser = Socialite::driver('facebook')->stateless()->user();
+    
+        $user = User::updateOrCreate(
+            ['facebook_id' => $facebookUser->getId()],
+            [
+                'name' => $facebookUser->getName(),
+                'email' => $facebookUser->getEmail(),
+                'facebook_token' => $facebookUser->token,
+            ]
+        );
+    
+        Auth::login($user);
+    
+        return redirect('/dashboard'); // or wherever you want
+    });
+
+
+
+    Route::get('/privacy-policy', function () {
+        return view('privacy-policy');
+    });
+    
+
 Route::get('/test',  [  LinkController::class, 'test'] );
 
 Route::get('/qr',  [  LinkController::class, 'testQR'] );
