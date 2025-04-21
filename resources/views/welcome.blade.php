@@ -373,7 +373,29 @@
 
 
   
-     
+     <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col">
+                    <h6 class="text-center">Footer</h6>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md col-sm-12">
+                    <h4 class="text-center">About us</h4>
+                </div> 
+                <div class="col-md col-sm-12">
+                    <h4 class="text-center">Contacts</h4>
+                </div> 
+                <div class="col-md col-sm-12">
+                    <h4 class="text-center">About us</h4>                    
+                </div> 
+                <div class="col-md col-sm-12">
+                    <h4 class="text-center">Comment and suggestions</h4>
+                </div> 
+            </div>
+        </div>
+     </footer>
     </body>
 
 
