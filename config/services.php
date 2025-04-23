@@ -27,6 +27,12 @@ return [
         'redirect' => env('FACEBOOK_REDIRECT_URI'),
     ],
 
+    //safe browsing
+    'google_safe_browsing' => [
+    'key' => env('GOOGLE_SAFE_BROWSING_KEY'),
+    ],
+
+
     'mailgun' => [
         'domain' => env('MAILGUN_DOMAIN'),
         'secret' => env('MAILGUN_SECRET'),
