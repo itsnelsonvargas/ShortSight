@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Link;
+use Illuminate\Support\Str;
+
 
 class LinkController extends Controller
 {
@@ -26,34 +28,46 @@ class LinkController extends Controller
     
     public function storeWithoutUserAccount(Request $request)
     {
+        $request->validate([
+            'url' => 'required|url',
+            'customSlugInput' => 'nullable|alpha_dash|max:20',
+        ]);
 
-        // Create a new Link model instance
         $link = new Link();
-        
-        // Save the URL passed in the request to the Link model
         $link->url = $request->url;
-    
-        // Generate a random 7-character slug using md5 and rand()
-        $randomSlug = substr(md5(rand()), 0, 7); // Generate a random slug of 7 characters
-    
-        $randomSlugB = substr(md5(rand()), 0, 3) . '-' . substr(md5(rand()), 3, 3); // Generate a random slug of 7 characters with a hyphen
-        
-        // Check if the generated slug already exists in the database
-        while (Link::where('slug', $randomSlug)->exists()) {
-            // If the generated slug already exists in the database, generate a new one
-            $randomSlug = substr(md5(rand()), 0, 7); //
+
+        if ($request->has('customSlug')) {
+            $slug = $request->customSlugInput;
+
+            if (Link::where('slug', $slug)->exists()) {
+                return back()->withErrors(['customSlugInput' => 'This custom slug is already taken.']);
+            }
+        } else {
+            do {
+                $slug = Str::random(7);
+            } while (Link::where('slug', $slug)->exists());
         }
 
-        // Assign the generated slug to the 'short' attribute of the Link model
-        $link->slug = $randomSlug;
-    
-        // Save the new Link model instance to the database
+        $link->slug = $slug;
         $link->save();
-    
-        // Return the 'welcome' view with the new random slug
-        return view('welcome', ['newSlug' => $randomSlug, 'submittedUrl' => $request->url]);
+
+        $data = [
+            'newSlug' => $slug,
+            'submittedUrl' => $request->url,
+             
+        ];
+
+        return view('welcome', compact('data'));
     }
     
+    public function downloadPng($slug)
+    {
+        $png = QrCode::format('png')->size(200)->generate($slug);
+
+        return response($png, 200)
+        ->header('Content-Type', 'image/png')
+        ->header('Content-Disposition', 'attachment; filename="qrcode.png"');
+    }
 
     public function show($id)
     {
@@ -62,7 +76,6 @@ class LinkController extends Controller
             //Look for the slug in the database
             $link = Link::where('slug', $slug)->firstOrFail();
             
-            
             //redirect to the URL based on the slug  (Can be viewed in the database)
             return redirect($link->url); 
         } catch (\Exception $e) {
@@ -70,6 +83,19 @@ class LinkController extends Controller
             return abort(404);
         }
           
+    }
+
+    public function checkSlug(Request $request)
+    {    
+        //Get the slug to validate
+        $slug = $request->input('slug');
+       
+
+        //Check if the slug is already used
+        $exists = \App\Models\Link::where('slug', $slug)->exists();  
+       
+        //dd(  $exists) ;
+        return response()->json(['exists' => $exists]);
     }
 
     public function edit($id)
@@ -85,5 +111,19 @@ class LinkController extends Controller
     public function destroy($id)
     {
         // Code to delete a specific link
+    }
+
+    public function test()
+    {
+        return view('test');
+    }
+
+
+    public function testQR()
+    {
+ 
+        $data = 'https://facebook.com';
+        return view('generateQR', compact('data'));
+ 
     }
 }

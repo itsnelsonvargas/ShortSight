@@ -1,7 +1,5 @@
 <?php
  //SSO
-
-
  
 
 use Illuminate\Support\Facades\Route;
@@ -27,25 +25,66 @@ use App\Http\Controllers\SSOController;
 */
 
 
- 
+Route::get('/testqrr/{slug}', [LinkController::class, 'downloadPng'])
+    ->name('downloadPng');
 
 
-Route::get('/',[LinkController::class, 'create'])->name('home');
 
-Route::post('/', [LinkController::class, 'storeWithoutUserAccount'])->name('createLinkWithoutUserAccount');
+Route::get('/',[LinkController::class, 'create'])
+    ->name('home');
 
-Route::get('/logout', [AuthController::class,'logout'])->name('logout');
+Route::post('/', [LinkController::class, 'storeWithoutUserAccount'])
+    ->name('createLinkWithoutUserAccount');
 
-Route::get('/auth/google', [SSOController::class,'index'])->name('google.login');
+Route::get('/logout', [AuthController::class,'logout'])
+    ->name('logout');
 
-Route::get('/auth/google/callback', [SSOController::class, 'store'])->name('google.callback');
+Route::get('/auth/google', [SSOController::class,'index'])
+    ->name('google.login');
 
-Route::get('/test', function (Request $request) {
-    return response()->json(getVisitorInfo($request));
-});
+Route::get('/auth/google/callback', [SSOController::class, 'store'])
+    ->name('google.callback');
+
+
+
+
+Route::get('/login/facebook', function () {
+        return Socialite::driver('facebook')->redirect();
+    })->name('facebook.login');
+    
+Route::get('/auth/facebook/callback', function () {
+        $facebookUser = Socialite::driver('facebook')->stateless()->user();
+    
+        $user = User::updateOrCreate(
+            ['facebook_id' => $facebookUser->getId()],
+            [
+                'name' => $facebookUser->getName(),
+                'email' => $facebookUser->getEmail(),
+                'facebook_token' => $facebookUser->token,
+            ]
+        );
+    
+        Auth::login($user);
+    
+        return redirect('/dashboard'); // or wherever you want
+    });
+
+
+
+    Route::get('/privacy-policy', function () {
+        return view('privacy-policy');
+    });
+    
+
+Route::get('/test',  [  LinkController::class, 'test'] );
+
+Route::get('/qr',  [  LinkController::class, 'testQR'] );
 
 
 Route::get('/{slug}',  [LinkController::class, 'show']   );
+
+Route::post('/check-slug',  [LinkController::class, 'checkSlug'] )
+    ->name('checkSlug');
 
 Route::get('/redirect-ad-page',  function (Request $request) {
     return view('redirectAdPage');

@@ -1,35 +1,65 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+
     <head>
+
         <x:head></x:head>
-        <script src="{{ url('/js/home.js') }}"></script>
+
+        <script>
+            const checkSlugUrl = '{{ route("checkSlug") }}';
+        </script>
+
+        <meta name="csrf-token" content="{{ csrf_token() }}">
+
+        <script src="{{ asset('js/home.js') }}"></script>
+
     </head>
+
     <body class="antialiased">
-    
+
+    <nav class="navbar w-100 navbar-expand-lg navbar-light bg-light px-4">
+        <a class="navbar-brand" href="#">ShortSight</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto gap-3">
+                <li class="nav-item active">
+                    <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Features</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Pricing</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Contact</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+
+
     <div class="container-fluid">
- 
+
 
         <div class="row">
             <div class="col h-25">
 
-                <h1 class="text-center p-5">URL Shortener</h1>
+                <h1 class="text-center p-5">{{ env('APP_NAME') }}</h1>
 
             </div>
         </div>
 
 
-        <div class="row">
-            <div class="col-md-12 ">
-                
-            </div>
-        </div>  
-
-        <hr style="background-color:white;">
 
         <div class="row">
 
             <div class="col-md-4 col-sm-12">
-                 
+
             </div><!--left col-md-4-->
 
             <div class="col-md-4 col-sm-12">
@@ -37,45 +67,59 @@
                 <div class="card form-bg">
 
                     <div class="card-header">
-                        
-                        <h3 class="text-center">Shorten a URL<i class="fa fa-link" aria-hidden="true"></i></h3>  
 
-                        <!-- Display the message from the controller --> 
-                        @if(isset($newSlug))
-                            <div class="alert alert-success">
-                                <p>You may now access the shortened link via: 
-                                <a href="{{ url($submittedUrl) }}" target="_blank">
-                                <strong>{{ url($newSlug) }}</strong>
+                        <h3 class="text-center">Shorten a URL<i class="fa fa-link" aria-hidden="true"></i></h3>
+
+
+                        <!-- Display the message from the controller -->
+                        @if(isset($data['newSlug']))
+
+                            <div class="alert alert-light text-center">
+
+                                {!! QrCode::format('svg')->size(150)->generate(env('APP_URL') . '/' . $data['newSlug']) !!}
+
+
+                                <p>You may now access the shortened link via:
+                                    <a href="{{ url($data['submittedUrl']) }}" target="_blank">
+                                        <strong>{{ url($data['newSlug']) }}</strong>
                                     </a>
-                                </p> 
+                                    <button class="btn  ss" onclick="copyToClipboard('{{ env('APP_URL') . '/' . $data['newSlug'] }}')"
+                                        style="background-color:transparent; border:none;">
+                                        <i class="fa fa-copy"></i> Copy
+                                    </button>
+                                </p>
 
-                                <button class="btn  btn-outline-success" onclick="copyToClipboard('{{ env('APP_URL') . '/' . $newSlug }}')"> 
-                                    <i class="fa fa-copy "></i> Copy
-                                </button>
                             </div>
+
+
+
+
+
                         @endif
 
                     </div>
-                    
+
                     <div class="card-body">
                         <form method="POST" action="{{ route('createLinkWithoutUserAccount') }}">
                             @csrf
                             @method('POST')
+
+
                             <div class="form-group
                             @error('url') has-error @enderror">
                                 <label for="url">URL</label>
-                                <i class="fa-solid fa-circle-check check-icon "></i>  
 
-                                
-                                
-                                <input type="text" class="form-control" id="url" name="url" value=" ">
+
+
+                                <input type="text" class="form-control" id="url" name="url" required>
                                 @error('url')
                                     <span class="help-block
                                     text-danger">{{ $message }}</span>
-                                @enderror 
-                            </div> 
+                                @enderror
+                            </div>
 
                             <div class="form-group">
+
                                 <div class="form-check">
                                     <input type="checkbox" class="form-check-input" id="customSlug" name="customSlug" value="1"
                                         @if(Auth::check())
@@ -83,6 +127,10 @@
                                         @endif>
                                     <label class="form-check-label" for="customSlug">Use custom slug</label>
                                 </div>
+
+                                <small id="slug-status"></small>
+
+
                                 <input type="text" class="form-control mt-2" id="customSlugInput" name="customSlugInput"
                                     @if(Auth::check())
                                         placeholder="Enter custom slug"
@@ -90,16 +138,16 @@
                                     @else
                                         placeholder="For signed-in users only" disabled
                                         style="display:none;">
-                                    @endif 
-                                    
+                                    @endif
+
                             </div>
 
-                            <div class="form-group mt-3" id="formatOptions" 
+                            <div class="form-group mt-3" id="formatOptions"
                                 @if(Auth::check())
                                     style="display:none;">
                                 @else
                                     style="display:block;">
-                                @endif 
+                                @endif
                                 <label for="format">Slug Format:</label>
                                 <div class="form-check">
                                     <input type="radio" class="form-check-input" id="random7" name="format" value="random7" checked>
@@ -120,9 +168,9 @@
                                     const customSlugCheckbox = document.getElementById('customSlug');
                                     const customSlugInput = document.getElementById('customSlugInput');
                                     const formatOptions = document.getElementById('formatOptions');
-                                    
+
                                     customSlugCheckbox.addEventListener('change', function () {
-                                        
+
                                         // Handle the toggle for using a custom slug
                                         if (this.checked) {
                                             // If the user is authenticated
@@ -136,7 +184,7 @@
 
                                             // Show the custom slug input field
                                             customSlugInput.style.display = "block";
-                                            
+
                                             // Hide the format options
                                             formatOptions.style.display = "none";
                                         } else {
@@ -156,7 +204,7 @@
                     </div>
 
                     <div class="card-footer">
-                            <button type="submit" class="btn btn-outline-yellow  ">Shorten</button>  
+                            <button type="submit" id="submitButton" class="btn btn-outline-yellow  ">Shorten</button>
                         </form>
                     </div>
 
@@ -180,7 +228,7 @@
                         </button>
                     </form>
                 @else
-                 
+
                     <div class="card form-bg">
                         <div class="card-header">
                             <h3 class="text-center">Login</h3>
@@ -196,7 +244,7 @@
                                     @error('email')
                                         <span class="help-block
                                         text-danger">{{ $message }}</span>
-                                    @enderror   
+                                    @enderror
                                 </div>
                                 <div class="form-group
                                 @error('password') has-error @enderror">
@@ -207,18 +255,18 @@
                                         text-danger">{{ $message }}</span>
                                     @enderror
                                 </div>
-                            
+
                         </div>
 
-                        
-                        <div class="card-footer"> 
+
+                        <div class="card-footer">
                             <button type="submit" class="btn btn-outline-yellow px-3" style="width:100%;">Login</button>
                             </form>
                         </div>
- 
-                        
+
+
                         <div class="hr-or"><span>or</span></div>
-                        
+
                         <form action="{{ route('google.login') }}" method="GET">
                             @csrf
                             <button type="submit" class="btn btn-google">
@@ -229,7 +277,7 @@
                             </button>
                         </form>
 
-                        <form action="#" method="GET">
+                        <form action="{{ route('facebook.login') }}" method="GET">
                             @csrf
                             <button type="submit" class="btn btn-facebook">
                                 <i class="fa-brands fa-facebook-f px-1" ></i>
@@ -237,9 +285,9 @@
                             </button>
                         </form>
 
-                        
+
                     </div>
-                
+
                 @endif
             </div><!--right col-md-4-->
 
@@ -259,15 +307,15 @@
                     <img src="..." class="hidden card-img-top" alt="...">
                     <div class="card-body ">
                         <h5 class="card-title text-center">No account</h5>
-                        
+
                         <p><i class="fa fa-check" aria-hidden="true"></i>
-                        Absolutely for free.</p> 
+                        Absolutely for free.</p>
 
                         <p><i class="fa fa-check" aria-hidden="true"></i>
                         Unlimited link shortening.</p>
 
                         <p><i class="fa fa-check" aria-hidden="true"></i>
-                        User account is not required.</p> 
+                        User account is not required.</p>
 
                         <p><i class="fa fa-times" aria-hidden="true"></i>
                         No Customization of slug(link)</p>
@@ -277,7 +325,7 @@
 
                         <p><i class="fa fa-times" aria-hidden="true"></i>
                         No ownership of the slug(link)</p>
-                        
+
 
                         <a href="#" class="btn btn-outline-yellow">Start</a>
                     </div>
@@ -311,23 +359,45 @@
 
             </div>
 
-            
 
-                   
+
+
             <div class="col-md-3 col-sm-12">
 
             </div>
-             
+
 
         </div><!--row-->
 
     </div><!--container-fluid-->
 
 
-  
-     
+
+     <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col">
+                    <h6 class="text-center">Footer</h6>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md col-sm-12">
+                    <h4 class="text-center">About us</h4>
+                </div>
+                <div class="col-md col-sm-12">
+                    <h4 class="text-center">Contacts</h4>
+                </div>
+                <div class="col-md col-sm-12">
+                    <h4 class="text-center">About us</h4>
+                </div>
+                <div class="col-md col-sm-12">
+                    <h4 class="text-center">Comment and suggestions</h4>
+                </div>
+            </div>
+        </div>
+     </footer>
     </body>
 
 
-    
+
 </html>
