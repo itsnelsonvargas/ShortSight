@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Link;
 use Illuminate\Support\Str;
+use App\Services\UrlSafetyService; 
 
 
 class LinkController extends Controller
@@ -27,14 +28,26 @@ class LinkController extends Controller
 
     
     public function storeWithoutUserAccount(Request $request)
-    {
+    {   
+        /*
+        *
+        * storeWithoutUserAccount(Request $request)
+        * 1. Validate the URL and custom slug input
+        *
+        */
         $request->validate([
-            'url' => 'required|url',
-            'customSlugInput' => 'nullable|alpha_dash|max:20',
+            'url'               => 'required|url',
+            'customSlugInput'   => 'nullable|alpha_dash|max:20',
         ]);
 
         $link = new Link();
         $link->url = $request->url;
+
+        /***********************************************
+        *                                              *
+        * 2. Check a custom slug if valid.             *
+        *                                              *
+        ************************************************/
 
         if ($request->has('customSlug')) {
             $slug = $request->customSlugInput;
@@ -48,13 +61,31 @@ class LinkController extends Controller
             } while (Link::where('slug', $slug)->exists());
         }
 
+        /*
+        *
+        * Check if the URL is malicious using Google Safe Browsing API
+        *
+        */
+
+        if(  (new UrlSafetyService())->isMalicious($request->url) ) {
+            return back()->withErrors(['url' => 'The URL is malicious.']);
+        }
+
+        /*
+        *
+        * Save SLUG to the database.
+        *
+        */
         $link->slug = $slug;
         $link->save();
 
+
+        /**
+         * Return the SLUG and URL to the view
+         */
         $data = [
-            'newSlug' => $slug,
-            'submittedUrl' => $request->url,
-             
+            'newSlug'       => $slug,
+            'submittedUrl'  => $request->url,
         ];
 
         return view('welcome', compact('data'));
@@ -62,11 +93,13 @@ class LinkController extends Controller
     
     public function downloadPng($slug)
     {
-        $png = QrCode::format('png')->size(200)->generate($slug);
+        $png = QrCode::format('png')
+                ->size(200)
+                ->generate($slug);
 
         return response($png, 200)
-        ->header('Content-Type', 'image/png')
-        ->header('Content-Disposition', 'attachment; filename="qrcode.png"');
+                ->header('Content-Type', 'image/png')
+                ->header('Content-Disposition', 'attachment; filename="qrcode.png"');
     }
 
     public function show($id)

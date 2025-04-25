@@ -54,13 +54,13 @@ Route::get('/login/facebook', function () {
     
 Route::get('/auth/facebook/callback', function () {
         $facebookUser = Socialite::driver('facebook')->stateless()->user();
-    
+
         $user = User::updateOrCreate(
             ['facebook_id' => $facebookUser->getId()],
             [
-                'name' => $facebookUser->getName(),
-                'email' => $facebookUser->getEmail(),
-                'facebook_token' => $facebookUser->token,
+                'name'              => $facebookUser->getName(),
+                'email'             => $facebookUser->getEmail(),
+                'facebook_token'    => $facebookUser->token,
             ]
         );
     
@@ -76,9 +76,9 @@ Route::get('/auth/facebook/callback', function () {
     });
     
 
-Route::get('/test',  [  LinkController::class, 'test'] );
+Route::get('/test',  [LinkController::class, 'test'] );
 
-Route::get('/qr',  [  LinkController::class, 'testQR'] );
+Route::get('/qr',  [LinkController::class, 'testQR'] );
 
 
 Route::get('/{slug}',  [LinkController::class, 'show']   );
@@ -105,11 +105,11 @@ function getVisitorInfo(Request $request): array {
     return [
         'ip_address' => $ipAddress,
         'user_agent' => $request->header('user-agent'),
-        'browser' => $agent->browser(),
-        'device' => getDeviceType($agent),
-        'platform' => $agent->platform(),
-        'referer' => $request->header('referer') ?? 'N/A',
-        'location' => getLocationData($ipAddress),
+        'browser'    => $agent->browser(),
+        'device'     => getDeviceType($agent),
+        'platform'   => $agent->platform(),
+        'referer'    => $request->header('referer') ?? 'N/A',
+        'location'   => getLocationData($ipAddress),
     ];
 }
 
@@ -121,11 +121,11 @@ function getVisitorInfo(Request $request): array {
  */
 function getDeviceType(Agent $agent): string {
     return match (true) {
-        $agent->isMobile() => 'Mobile',
-        $agent->isTablet() => 'Tablet',
+        $agent->isMobile()  => 'Mobile',
+        $agent->isTablet()  => 'Tablet',
         $agent->isDesktop() => 'Desktop',
-        $agent->isRobot() => 'Robot (Bot)',
-        default => 'Unknown Device',
+        $agent->isRobot()   => 'Robot (Bot)',
+        default             => 'Unknown Device',
     };
 }
 
@@ -144,22 +144,22 @@ function getLocationData(string $ipAddress): array {
             $location = explode(',', $data['loc'] ?? ','); // Extract latitude and longitude
 
             return [
-                'country' => $data['country'] ?? null,
-                'city' => $data['city'] ?? null,
-                'region' => $data['region'] ?? null,
-                'postal_code' => $data['postal'] ?? null,
-                'latitude' => $location[0] ?? null,
-                'longitude' => $location[1] ?? null,
+                'country'       => $data['country'] ?? null,
+                'city'          => $data['city']    ?? null,
+                'region'        => $data['region']  ?? null,
+                'postal_code'   => $data['postal']  ?? null,
+                'latitude'      => $location[0]     ?? null,
+                'longitude'     => $location[1]     ?? null,
             ];
         }
     } catch (\Exception $e) {
         return [
-            'country' => null,
-            'city' => null,
-            'region' => null,
+            'country'     => null,
+            'city'        => null,
+            'region'      => null,
             'postal_code' => null,
-            'latitude' => null,
-            'longitude' => null,
+            'latitude'    => null,
+            'longitude'   => null,
         ];
     }
 }
