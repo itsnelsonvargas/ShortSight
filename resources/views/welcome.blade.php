@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    
+
     <head>
 
         <x:head></x:head>
-         
+
         <script>
             const checkSlugUrl = '{{ route("checkSlug") }}';
         </script>
@@ -44,8 +44,8 @@
 
 
     <div class="container-fluid">
- 
-        
+
+
         <div class="row">
             <div class="col h-25">
 
@@ -54,12 +54,12 @@
             </div>
         </div>
 
- 
+
 
         <div class="row">
 
             <div class="col-md-4 col-sm-12">
-                 
+
             </div><!--left col-md-4-->
 
             <div class="col-md-4 col-sm-12">
@@ -67,56 +67,56 @@
                 <div class="card form-bg">
 
                     <div class="card-header">
-                        
-                        <h3 class="text-center">Shorten a URL<i class="fa fa-link" aria-hidden="true"></i></h3>  
 
-                        
-                        <!-- Display the message from the controller --> 
+                        <h3 class="text-center">Shorten a URL<i class="fa fa-link" aria-hidden="true"></i></h3>
+
+
+                        <!-- Display the message from the controller -->
                         @if(isset($data['newSlug']))
-                        
+
                             <div class="alert alert-light text-center">
 
                                 {!! QrCode::format('svg')->size(150)->generate(env('APP_URL') . '/' . $data['newSlug']) !!}
 
 
-                                <p>You may now access the shortened link via: 
+                                <p>You may now access the shortened link via:
                                     <a href="{{ url($data['submittedUrl']) }}" target="_blank">
-                                        <strong>{{ url($data['newSlug']) }}</strong>  
+                                        <strong>{{ url($data['newSlug']) }}</strong>
                                     </a>
                                     <button class="btn  ss" onclick="copyToClipboard('{{ env('APP_URL') . '/' . $data['newSlug'] }}')"
-                                        style="background-color:transparent; border:none;"> 
+                                        style="background-color:transparent; border:none;">
                                         <i class="fa fa-copy"></i> Copy
                                     </button>
-                                </p>   
-                                
+                                </p>
+
                             </div>
 
-                            
 
-                        
-                           
+
+
+
                         @endif
 
                     </div>
-                    
+
                     <div class="card-body">
                         <form method="POST" action="{{ route('createLinkWithoutUserAccount') }}">
                             @csrf
                             @method('POST')
 
-                            
+
                             <div class="form-group
                             @error('url') has-error @enderror">
-                                <label for="url">URL</label> 
+                                <label for="url">URL</label>
 
-                                
-                                
+
+
                                 <input type="text" class="form-control" id="url" name="url" required>
                                 @error('url')
                                     <span class="help-block
                                     text-danger">{{ $message }}</span>
-                                @enderror 
-                            </div> 
+                                @enderror
+                            </div>
 
                             <div class="form-group">
 
@@ -127,10 +127,10 @@
                                         @endif>
                                     <label class="form-check-label" for="customSlug">Use custom slug</label>
                                 </div>
-                                
+
                                 <small id="slug-status"></small>
-                                 
-                            
+
+
                                 <input type="text" class="form-control mt-2" id="customSlugInput" name="customSlugInput"
                                     @if(Auth::check())
                                         placeholder="Enter custom slug"
@@ -138,16 +138,16 @@
                                     @else
                                         placeholder="For signed-in users only" disabled
                                         style="display:none;">
-                                    @endif 
-                                    
+                                    @endif
+
                             </div>
 
-                            <div class="form-group mt-3" id="formatOptions" 
+                            <div class="form-group mt-3" id="formatOptions"
                                 @if(Auth::check())
                                     style="display:none;">
                                 @else
                                     style="display:block;">
-                                @endif 
+                                @endif
                                 <label for="format">Slug Format:</label>
                                 <div class="form-check">
                                     <input type="radio" class="form-check-input" id="random7" name="format" value="random7" checked>
@@ -168,9 +168,9 @@
                                     const customSlugCheckbox = document.getElementById('customSlug');
                                     const customSlugInput = document.getElementById('customSlugInput');
                                     const formatOptions = document.getElementById('formatOptions');
-                                    
+
                                     customSlugCheckbox.addEventListener('change', function () {
-                                        
+
                                         // Handle the toggle for using a custom slug
                                         if (this.checked) {
                                             // If the user is authenticated
@@ -184,7 +184,7 @@
 
                                             // Show the custom slug input field
                                             customSlugInput.style.display = "block";
-                                            
+
                                             // Hide the format options
                                             formatOptions.style.display = "none";
                                         } else {
@@ -204,7 +204,7 @@
                     </div>
 
                     <div class="card-footer">
-                            <button type="submit" id="submitButton" class="btn btn-outline-yellow  ">Shorten</button>  
+                            <button type="submit" id="submitButton" class="btn btn-outline-yellow  ">Shorten</button>
                         </form>
                     </div>
 
@@ -228,7 +228,7 @@
                         </button>
                     </form>
                 @else
-                 
+
                     <div class="card form-bg">
                         <div class="card-header">
                             <h3 class="text-center">Login</h3>
@@ -244,7 +244,7 @@
                                     @error('email')
                                         <span class="help-block
                                         text-danger">{{ $message }}</span>
-                                    @enderror   
+                                    @enderror
                                 </div>
                                 <div class="form-group
                                 @error('password') has-error @enderror">
@@ -255,18 +255,18 @@
                                         text-danger">{{ $message }}</span>
                                     @enderror
                                 </div>
-                            
+
                         </div>
 
-                        
-                        <div class="card-footer"> 
+
+                        <div class="card-footer">
                             <button type="submit" class="btn btn-outline-yellow px-3" style="width:100%;">Login</button>
                             </form>
                         </div>
- 
-                        
+
+
                         <div class="hr-or"><span>or</span></div>
-                        
+
                         <form action="{{ route('google.login') }}" method="GET">
                             @csrf
                             <button type="submit" class="btn btn-google">
@@ -285,9 +285,9 @@
                             </button>
                         </form>
 
-                        
+
                     </div>
-                
+
                 @endif
             </div><!--right col-md-4-->
 
@@ -307,15 +307,15 @@
                     <img src="..." class="hidden card-img-top" alt="...">
                     <div class="card-body ">
                         <h5 class="card-title text-center">No account</h5>
-                        
+
                         <p><i class="fa fa-check" aria-hidden="true"></i>
-                        Absolutely for free.</p> 
+                        Absolutely for free.</p>
 
                         <p><i class="fa fa-check" aria-hidden="true"></i>
                         Unlimited link shortening.</p>
 
                         <p><i class="fa fa-check" aria-hidden="true"></i>
-                        User account is not required.</p> 
+                        User account is not required.</p>
 
                         <p><i class="fa fa-times" aria-hidden="true"></i>
                         No Customization of slug(link)</p>
@@ -325,7 +325,7 @@
 
                         <p><i class="fa fa-times" aria-hidden="true"></i>
                         No ownership of the slug(link)</p>
-                        
+
 
                         <a href="#" class="btn btn-outline-yellow">Start</a>
                     </div>
@@ -359,20 +359,20 @@
 
             </div>
 
-            
 
-                   
+
+
             <div class="col-md-3 col-sm-12">
 
             </div>
-             
+
 
         </div><!--row-->
 
     </div><!--container-fluid-->
 
 
-  
+
      <footer>
         <div class="container">
             <div class="row">
@@ -383,21 +383,21 @@
             <div class="row">
                 <div class="col-md col-sm-12">
                     <h4 class="text-center">About us</h4>
-                </div> 
+                </div>
                 <div class="col-md col-sm-12">
                     <h4 class="text-center">Contacts</h4>
-                </div> 
+                </div>
                 <div class="col-md col-sm-12">
-                    <h4 class="text-center">About us</h4>                    
-                </div> 
+                    <h4 class="text-center">About us</h4>
+                </div>
                 <div class="col-md col-sm-12">
                     <h4 class="text-center">Comment and suggestions</h4>
-                </div> 
+                </div>
             </div>
         </div>
      </footer>
     </body>
 
 
-    
+
 </html>

@@ -10,7 +10,7 @@ function copyToClipboard(url) {
    document.execCommand('copy');
    document.body.removeChild(el);
    alert('Copied to clipboard!');
-} 
+}
 
 
 $(document).ready(function () {
@@ -31,12 +31,12 @@ $(document).ready(function () {
 
 
    $('#customSlugInput').on('input', function () {
- 
+
         const submitButton = $('#submitButton');
         let slug = $(this).val().trim();
 
         if (slug.length === 0) return;
-        
+
         if (slug.includes(' ')) {
             $('#slug-status').text('Slug cannot contain spaces.').css('color', 'red');
             return;
@@ -44,11 +44,11 @@ $(document).ready(function () {
 
         const MIN_LENGTH = 6; // Minimum length for slug
         if(slug.length < MIN_LENGTH) {
-            
+
             let neededChars = MIN_LENGTH - slug.length;
             $('#slug-status').text(`Slug must be at least ${MIN_LENGTH} characters long. ${neededChars} more character(s) needed.`).css('color', 'red');
-            
-           
+
+
            return;
         }
 
@@ -57,19 +57,19 @@ $(document).ready(function () {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             }
         });
-         
+
         $.ajax({
             url: checkSlugUrl, // URL to your slug checking endpoint. Declared from the Welcome.blade.php
             type: 'POST',
             data: { slug: slug },
-            
-            beforeSend: function () { 
-               
+
+            beforeSend: function () {
+
                 let spinnerLogo = '<i id="logo-check-slug" class="fa fa-spinner fa-spin" aria-hidden="true"></i>'
                 $('#slug-status').html(spinnerLogo + ' Checking...');
             },
             success: function (response) {
-                if (response.exists) { 
+                if (response.exists) {
                     $('#slug-status').text('Slug already exists').css('color', 'red');
 
                 } else {
@@ -87,7 +87,6 @@ $(document).ready(function () {
 
 
 });
- 
 
 
- 
+
