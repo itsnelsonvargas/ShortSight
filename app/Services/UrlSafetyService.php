@@ -30,8 +30,10 @@ class UrlSafetyService
             ],
         ]);
 
-       // dd($response->json()); // Dump and die to check the actual response format
-
+        // dd($response->json()); // Dump and die to check the actual response format
+        // FOR TESTING:
+        // Malicious URL: www.testsafebrowsing.appspot.com/s/malware.html
+        
         if (!$response->successful()) {
             return false; // fallback if API fails
         }

@@ -91,6 +91,33 @@ Route::get('/redirect-ad-page',  function (Request $request) {
 })->name('redirectAdPage');
 
 
+
+
+
+
+/**
+ *  
+ * For the endpoints of the API.
+ * 
+ */
+
+
+
+
+ Route::get('/api/v1/link/{url}', [ApiController::class, 'getStoredLink'])
+        ->name('getLink');
+
+
+
+
+
+
+
+
+
+
+
+
 /**
  * Get visitor information based on request headers and user agent.
  *

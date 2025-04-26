@@ -71,11 +71,7 @@ class LinkController extends Controller
             return back()->withErrors(['url' => 'The URL is malicious.']);
         }
 
-        /*
-        *
-        * Save SLUG to the database.
-        *
-        */
+      
         $link->slug = $slug;
         $link->save();
 

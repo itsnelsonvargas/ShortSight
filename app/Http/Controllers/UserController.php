@@ -16,4 +16,5 @@ class UserController extends Controller
         // Code to save a new User
         return view('user.registration');
     }
+ 
 }
