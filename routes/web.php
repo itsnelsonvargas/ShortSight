@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Http;
 use App\Http\Controllers\LinkController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\SSOController;
- 
+use App\Http\Controllers\ApiController;
 
 /*
 |--------------------------------------------------------------------------

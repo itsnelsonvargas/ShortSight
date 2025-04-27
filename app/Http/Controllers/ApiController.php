@@ -2,7 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use Illuminate\Http\Request; 
+use App\Models\Link;
 
 class ApiController extends Controller
 {
@@ -16,7 +17,11 @@ class ApiController extends Controller
             return response()->json(['error' => 'Link not found'], 404);
         }
 
+        $data = [
+            'link'   => $link->url,
+            
+        ];
         // Return the link details
-        return response()->json($link);
+        return response()->json($data);
     }
 }
