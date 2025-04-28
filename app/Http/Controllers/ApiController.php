@@ -19,9 +19,33 @@ class ApiController extends Controller
 
         $data = [
             'link'   => $link->url,
-            
         ];
+
         // Return the link details
         return response()->json($data);
+    }
+
+    public function isSlugAvailable($slug)
+    {
+        // Check if the slug is available
+        $link = Link::where('slug', $slug)->first();
+
+        if ($link) {
+            return response()->json(['available' => false]);
+        }
+
+        return response()->json(['available' => true]);
+    }
+
+    public function isLinkInDatabase($link)
+    {
+        // Check if the link is in the database
+        $link = Link::where('url', $link)->first();
+
+        if ($link) {
+            return response()->json(['in_database' => true]);
+        }
+
+        return response()->json(['in_database' => false]);
     }
 }
