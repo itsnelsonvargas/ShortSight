@@ -39,35 +39,20 @@ Route::post('/', [LinkController::class, 'storeWithoutUserAccount'])
 Route::get('/logout', [AuthController::class,'logout'])
     ->name('logout');
 
-Route::get('/auth/google', [SSOController::class,'index'])
+Route::get('/auth/google', [SSOController::class,'indexGoogle'])
     ->name('google.login');
 
-Route::get('/auth/google/callback', [SSOController::class, 'store'])
+Route::get('/auth/google/callback', [SSOController::class, 'storeGoogle'])
     ->name('google.callback');
 
 
 
 
-Route::get('/login/facebook', function () {
-        return Socialite::driver('facebook')->redirect();
-    })->name('facebook.login');
+Route::get('/login/facebook', [SSOController::class, 'indexFacebook'])
+    ->name('facebook.login');
     
-Route::get('/auth/facebook/callback', function () {
-        $facebookUser = Socialite::driver('facebook')->stateless()->user();
-
-        $user = User::updateOrCreate(
-            ['facebook_id' => $facebookUser->getId()],
-            [
-                'name'              => $facebookUser->getName(),
-                'email'             => $facebookUser->getEmail(),
-                'facebook_token'    => $facebookUser->token,
-            ]
-        );
-    
-        Auth::login($user);
-    
-        return redirect('/dashboard'); // or wherever you want
-    });
+Route::get('/auth/facebook/callback', [SSOController::class,'storeFacebook'])
+    ->name('facebook.callback');
 
 
 
