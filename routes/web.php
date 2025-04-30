@@ -24,10 +24,7 @@ use App\Http\Controllers\ApiController;
 |
 */
 
-
-Route::get('/testqrr/{slug}', [LinkController::class, 'downloadPng'])
-    ->name('downloadPng');
-
+ 
 
 
 Route::get('/',[LinkController::class, 'create'])
@@ -39,7 +36,7 @@ Route::post('/', [LinkController::class, 'storeWithoutUserAccount'])
 Route::get('/logout', [AuthController::class,'logout'])
     ->name('logout');
 
-Route::get('/auth/google', [SSOController::class,'indexGoogle'])
+Route::get('/auth/google',  [SSOController::class,'indexGoogle'])
     ->name('google.login');
 
 Route::get('/auth/google/callback', [SSOController::class, 'storeGoogle'])

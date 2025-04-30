@@ -18,3 +18,11 @@ use App\Http\Controllers\ApiController;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+Route::get('/api/v1/link/{url}', [ApiController::class, 'getStoredLink'])
+->name('getLink');
+
+Route::get('/api/v1/check-slug/{slug}', [ApiController::class, 'isSlugAvailable'])
+->name('checkSlug');
+
+Route::get('/api/v1/check-slug/test12',  function(){return 'test';});
