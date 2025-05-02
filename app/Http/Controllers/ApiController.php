@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request; 
 use App\Models\Link;
+use App\Services\UrlSafetyService; 
 
 class ApiController extends Controller
 {
@@ -47,5 +48,14 @@ class ApiController extends Controller
         }
 
         return response()->json(['in_database' => false]);
+    }
+
+    public function isUrlSafe($link)
+    {
+        if(  (new UrlSafetyService())->isMalicious($link) ) {
+            return response()->json(['safe' => false]);
+        }
+
+        return response()->json(['safe' => true]);
     }
 }

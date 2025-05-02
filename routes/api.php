@@ -27,3 +27,5 @@ Route::get('/api/v1/check-slug/test12',  function(){return 'test';});
 Route::get('/api/v1/check-slug/{slug}', [ApiController::class, 'isSlugAvailable'])
 ->name('checkSlug');
 
+Route::get('/api/v1/check-url/{url}', [ApiController::class, 'isUrlSafe'])
+->name('checkSlug');
