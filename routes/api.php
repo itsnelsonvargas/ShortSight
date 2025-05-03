@@ -15,6 +15,10 @@ use App\Http\Controllers\ApiController;
 |
 */
 
+
+/*
+ *This route is used to get the authenticated user.
+ */
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });

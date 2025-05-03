@@ -17,4 +17,28 @@ class AuthController extends Controller
     
         return redirect('/'); // Redirect to home or login page
     }
+
+    /*************************************
+    *                                    *
+    * Not yet connect to logging in.     *
+    *                                    *
+    *************************************/
+    public function login(Request $request)
+    {
+        // Find user by email
+        $user = User::where('email', $request->email)->first();
+
+        // Check if user exists and password is correct
+        if (! $user || ! Hash::check($request->password, $user->password)) {
+            return response()->json(['message' => 'Invalid credentials'], 401);
+        }
+
+        // Create a new personal access token with optional abilities (e.g., read/write)
+        $token = $user->createToken('api-token', ['read', 'write'])->plainTextToken;
+
+        // Return the token in the response
+        return response()->json(['token' => $token]);
+    }
+
+
 }
