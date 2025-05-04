@@ -61,11 +61,11 @@ class LinkController extends Controller
             } while (Link::where('slug', $slug)->exists());
         }
 
-        /*
-        *
-        * Check if the URL is malicious using Google Safe Browsing API
-        *
-        */
+        /****************************************************************
+        *                                                               *
+        * Check if the URL is malicious using Google Safe Browsing API  *
+        *                                                               *        
+        ****************************************************************/
 
         if(  (new UrlSafetyService())->isMalicious($request->url) ) {
             return back()->withErrors(['url' => 'The URL is malicious.']);

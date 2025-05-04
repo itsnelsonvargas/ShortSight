@@ -23,13 +23,22 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+Route::get('/api/v1/create-token}', [ApiController::class, 'getStoredLink'])
+            ->name('getLink');
+
+
+
 Route::get('/api/v1/link/{url}', [ApiController::class, 'getStoredLink'])
-->name('getLink');
+            ->name('getLink');
 
 Route::get('/api/v1/check-slug/test12',  function(){return 'test';});
 
 Route::get('/api/v1/check-slug/{slug}', [ApiController::class, 'isSlugAvailable'])
-->name('checkSlug');
+            ->name('checkSlug');
+
+Route::get('/api/v1/get-slug/{link}', [ApiController::class, 'getSlugOfLink'])
+            ->name('checkSlug');
+
 
 Route::get('/api/v1/check-url/{url}', [ApiController::class, 'isUrlSafe'])
-->name('checkSlug');
+            ->name('checkSlug');
