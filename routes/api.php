@@ -23,10 +23,11 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::get('/api/v1/create-token}', [ApiController::class, 'getStoredLink'])
-            ->name('getLink');
+Route::get('/api/v1/create-token}', [ApiController::class, 'createToken'])
+            ->name('createToken');
 
-
+Route::get('/api/v1/delete-token}', [ApiController::class, 'deleteToken'])
+            ->name('deleteToken');
 
 Route::get('/api/v1/link/{url}', [ApiController::class, 'getStoredLink'])
             ->name('getLink');

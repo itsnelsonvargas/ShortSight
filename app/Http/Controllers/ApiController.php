@@ -11,7 +11,11 @@ use App\Models\User;
 class ApiController extends Controller
 {   
 
-
+    /********************************************
+    *                                           *
+    * This is for creating a token for the user *
+    *                                           *
+    ********************************************/
 
     public function createToken(Request $request)
     {
@@ -36,6 +40,28 @@ class ApiController extends Controller
         return response()->json([
             'access_token'  => $token,   
         ], 200);
+    }
+
+
+
+    public function deleteToken(Request $request)
+    {
+        // Validate the request
+        $request->validate([
+            'token' => 'required',
+        ]);
+
+        // Find the user by token
+        $user = User::where('id', $request->user()->id)->first();
+
+        if (!$user) {
+            return response()->json(['error' => 'User not found'], 404);
+        }
+
+        // Revoke the token
+        $user->tokens()->where('id', $request->token)->delete();
+
+        return response()->json(['message' => 'Token revoked successfully'], 200);
     }
 
 
