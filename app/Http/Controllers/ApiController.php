@@ -43,7 +43,11 @@ class ApiController extends Controller
     }
 
 
-
+    /********************************************
+    *                                           *                                                         
+    * This is for deleting a token for the user *
+    *                                           *
+    *********************************************/
     public function deleteToken(Request $request)
     {
         // Validate the request
@@ -65,7 +69,11 @@ class ApiController extends Controller
     }
 
 
-
+    /***********************************************
+     *                                             *
+     * get the store link using the slug provided  *
+     *                                             *
+     **********************************************/
     public function getStoredLink($slug)
     {
 
@@ -122,7 +130,7 @@ class ApiController extends Controller
         if ($link) {
             return response()->json([
                 'in_database' => false,
-                'slug' => $link->slug
+                'slug'        => $link->slug
             ]);
         }
 
