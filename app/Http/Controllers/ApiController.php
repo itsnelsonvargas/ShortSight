@@ -93,7 +93,12 @@ class ApiController extends Controller
     }
 
 
-
+    /***********************************************
+     *                                             *
+     * Check if the slug is available              *
+     *               true or false                 *                              
+     *                                             *
+     **********************************************/
     public function isSlugAvailable($slug)
     {
         // Check if the slug is available
@@ -107,7 +112,12 @@ class ApiController extends Controller
     }
 
 
-    
+    /***********************************************
+     *                                             *
+     * Check if the link is in the database        *
+     *              true or false                  *
+     *                                             *
+     **********************************************/
     public function isLinkInDatabase($link)
     {
         // Check if the link is in the database
@@ -121,6 +131,11 @@ class ApiController extends Controller
     }
 
 
+    /***********************************************
+     *                                             *
+     * get the slug of the link provided           *
+     *                                             *
+     **********************************************/
 
     public function getSlugOfLink($link)
     {
@@ -139,12 +154,25 @@ class ApiController extends Controller
 
 
 
-    public function isUrlSafe($link)
+    /******************************************
+     *                                        *
+     * Check if the link is safe              *
+     *                                        *
+     *****************************************/
+    public function isUrlSafe(Request $request)
     {
+        // Validate the request
+        $request->validate([
+            'link' => 'required|url',
+        ]);
+
+        $link = $request->input('link');
+
+        // Check if the link is safe
+ 
         if(  (new UrlSafetyService())->isMalicious($link) ) {
             return response()->json(['safe' => false]);
         }
-
         return response()->json(['safe' => true]);
     }
 
