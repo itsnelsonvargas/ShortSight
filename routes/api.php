@@ -23,6 +23,21 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+
+
+/*********************************
+*                                *
+* Test if the API is working     *
+* Already tested                 *
+*                                *
+*********************************/
+Route::get('/v1/ping', function () {
+    return response()->json([
+        'status' => 'success',
+        'message' => 'pong',
+    ]);
+});
+
 Route::get('/api/v1/create-token}', [ApiController::class, 'createToken'])
             ->name('createToken');
 
@@ -31,8 +46,6 @@ Route::get('/api/v1/delete-token}', [ApiController::class, 'deleteToken'])
 
 Route::get('/api/v1/link/{url}', [ApiController::class, 'getStoredLink'])
             ->name('getLink');
-
- 
 
 Route::get('/api/v1/check-slug', [ApiController::class, 'isSlugAvailable'])
             ->name('checkSlug');
