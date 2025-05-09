@@ -38,20 +38,20 @@ Route::get('/v1/ping', function () {
     ]);
 });
 
-Route::get('/api/v1/create-token}', [ApiController::class, 'createToken'])
+Route::get('/v1/create-token}', [ApiController::class, 'createToken'])
             ->name('createToken');
 
-Route::get('/api/v1/delete-token}', [ApiController::class, 'deleteToken'])
+Route::get('/v1/delete-token}', [ApiController::class, 'deleteToken'])
             ->name('deleteToken');
 
-Route::get('/api/v1/link/{url}', [ApiController::class, 'getStoredLink'])
+Route::get('/v1/link/{url}', [ApiController::class, 'getStoredLink'])
             ->name('getLink');
 
-Route::get('/api/v1/check-slug', [ApiController::class, 'isSlugAvailable'])
+Route::get('/v1/check-slug', [ApiController::class, 'isSlugAvailable'])
             ->name('checkSlug');
 
-Route::get('/api/v1/get-slug/{link}', [ApiController::class, 'getSlugOfLink'])
+Route::get('/v1/get-slug/{link}', [ApiController::class, 'getSlugOfLink'])
             ->name('checkSlug');
 
-Route::get('/api/v1/check-url/{url}', [ApiController::class, 'isUrlSafe'])
+Route::get('/v1/check-url/{url}', [ApiController::class, 'isUrlSafe'])
             ->name('checkSlug');
