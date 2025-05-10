@@ -33,7 +33,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 *********************************/
 Route::get('/v1/ping', function () {
     return response()->json([
-        'status' => 'success',
+        'status'  => 'success',
         'message' => 'pong',
     ]);
 });

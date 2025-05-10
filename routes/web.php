@@ -37,6 +37,7 @@ Route::get('/logout', [AuthController::class,'logout'])
     ->name('logout');
 
 Route::get('/auth/google',  [SSOController::class,'indexGoogle'])
+    ->middleware('throttle:3,5')
     ->name('google.login');
 
 Route::get('/auth/google/callback', [SSOController::class, 'storeGoogle'])
