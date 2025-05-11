@@ -38,7 +38,7 @@ Route::get('/v1/ping', function () {
     ]);
 });
 
-Route::get('/v1/create-token}', [ApiController::class, 'createToken'])
+Route::post('/v1/create-token', [ApiController::class, 'createToken'])
             ->name('createToken');
 
 Route::get('/v1/delete-token}', [ApiController::class, 'deleteToken'])

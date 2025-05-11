@@ -27,7 +27,7 @@ use App\Http\Controllers\ApiController;
  
 
 
-Route::get('/',[LinkController::class, 'create'])
+Route::get('/',[LinkController::class, 'index'])
     ->name('home');
 
 Route::post('/', [LinkController::class, 'storeWithoutUserAccount'])

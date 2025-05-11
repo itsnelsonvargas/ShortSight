@@ -12,13 +12,16 @@ class LinkController extends Controller
 {
     public function index()
     {
-        // Code to list all links
-    }
-
-    public function create()
-    {
+        $newLinks = Link::latest()->take(5)->get();
+        $newLinks = $newLinks->toArray();
+        $data = [
+            'newLinks'      => $newLinks,
+            'newSlug'       => '',
+            'submittedUrl'  => '',
+        ];
+ 
         // Code to show form to create a new link
-        return view('welcome');
+        return view('welcome', compact('data'));
     }
 
     public function store(Request $request)
