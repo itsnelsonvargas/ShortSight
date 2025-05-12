@@ -297,7 +297,7 @@
             <div class="col">
                 <div class="table-responsive">
 
-                    <table class="table  table-bordered table-hover text-white">
+                    <table class="table text-center table-bordered table-hover text-white">
                     <thead>
                         <tr> 
                             <th scope="col">Shortened URL</th>
@@ -316,7 +316,7 @@
                             <td>{{ $link['url'] }}</td>
                             <td>QR</td>
                             <td>QR</td>
-                            <td>{{ $link['created_at'] }}</td>
+                            <td>{{ \Carbon\Carbon::parse($link['created_at'])->format('d F H:i:s') }}</td>
                         </tr>
                         @endforeach
                     </tbody>
