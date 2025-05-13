@@ -293,39 +293,6 @@
 
         </div>
 
-        <div class="row py-5">
-            <div class="col">
-                <div class="table-responsive">
-
-                    <table class="table text-center table-bordered table-hover text-white">
-                    <thead>
-                        <tr> 
-                            <th scope="col">Shortened URL</th>
-                            <th scope="col">Original URL</th>
-                            <th scope="col">QR Code</th>
-                            <th scope="col">Status</th>
-                            <th scope="col">Created At</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    <tbody>
-                        
-                        @foreach($data['newLinks'] as $link)
-                        <tr>
-                            <td>{{ $link['slug'] }}</td>
-                            <td>{{ $link['url'] }}</td>
-                            <td>QR</td>
-                            <td>QR</td>
-                            <td>{{ \Carbon\Carbon::parse($link['created_at'])->format('d F H:i:s') }}</td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-
         <div class="row">
             <div class="col">
                 <h3 class="text-center pt-5 pb-3">Pricing</h3>
