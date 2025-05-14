@@ -76,9 +76,7 @@
 
                             <div class="alert alert-light text-center">
 
-                                {!! QrCode::format('svg')->size(150)->generate(env('APP_URL') . '/' . $data['newSlug']) !!}
-
-
+                        
                                 <p>You may now access the shortened link via:
                                     <a href="{{ url($data['submittedUrl']) }}" target="_blank">
                                         <strong>{{ url($data['newSlug']) }}</strong>
