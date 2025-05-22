@@ -73,7 +73,7 @@
 
                         <!-- Display the message from the controller -->
                         @if(isset($data['newSlug']))
-
+   
                             <div class="alert alert-light text-center">
 
                         
@@ -393,7 +393,7 @@
                 </div>
             </div>
         </div>
-     </footer>
+    </footer>
     </body>
 
 

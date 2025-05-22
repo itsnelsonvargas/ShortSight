@@ -16,7 +16,7 @@ class LinkController extends Controller
         $newLinks = $newLinks->toArray();
         $data = [
             'newLinks'      => $newLinks,
-            'newSlug'       => '',
+           
             'submittedUrl'  => '',
         ];
  
