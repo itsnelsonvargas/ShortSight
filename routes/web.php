@@ -12,6 +12,7 @@ use App\Http\Controllers\LinkController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\SSOController;
 use App\Http\Controllers\ApiController;
+use App\Http\Controllers\UserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -58,6 +59,10 @@ Route::get('/auth/facebook/callback', [SSOController::class,'storeFacebook'])
         return view('privacy-policy');
     });
     
+Route::get('/register',[UserController::class, 'index'])
+    ->name('register');
+Route::post('/register',[UserController::class, 'store'])
+    ->name('saveUserAccount');
 
 Route::get('/test',  [LinkController::class, 'test'] );
 

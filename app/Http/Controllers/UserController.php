@@ -6,9 +6,9 @@ use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
-    public function create()
+    public function index()
     {
-        // Code to show form to create a new User
+        return view('user.registration');
     }
 
     public function store(Request $request)
