@@ -230,7 +230,7 @@
                     <div class="card form-bg">
                         <div class="card-header">
                             <h3 class="text-center">Login</h3>
-                            <small>To track and manage your shorten link. Contains visitor's </small>
+                            <small>To track and manage your shorten link. </small>
                         </div>
                         <div class="card-body">
                             <form method="POST" action=" ">
@@ -261,7 +261,9 @@
                             <button type="submit" class="btn btn-outline-yellow px-3" style="width:100%;">Login</button>
                             </form>
                         </div>
-
+                        <div class="card-footer">
+                            <button type="submit" class="btn btn-outline-yellow px-3" style="width:100%;">Login</button>
+                        </div>
 
                         <div class="hr-or"><span>or</span></div>
 
