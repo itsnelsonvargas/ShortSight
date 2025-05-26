@@ -264,6 +264,9 @@
                         <div class="card-footer">
                             <button type="submit" class="btn btn-outline-yellow px-3" style="width:100%;">Login</button>
                         </div>
+                        <div class="card-footer">
+                            <a href="{{ route('register') }}" class="btn btn-outline-yellow px-3" style="width:100%;">Register</a>
+                        </div>
 
                         <div class="hr-or"><span>or</span></div>
 
