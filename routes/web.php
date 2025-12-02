@@ -1,6 +1,4 @@
 <?php
- //SSO
- 
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
@@ -25,18 +23,7 @@ use App\Http\Controllers\UserController;
 |
 */
 
- 
-
-
-Route::get('/',[LinkController::class, 'index'])
-    ->name('home');
-
-Route::post('/', [LinkController::class, 'storeWithoutUserAccount'])
-    ->name('createLinkWithoutUserAccount');
-
-Route::get('/logout', [AuthController::class,'logout'])
-    ->name('logout');
-
+// SSO Routes
 Route::get('/auth/google',  [SSOController::class,'indexGoogle'])
     ->middleware('throttle:3,5')
     ->name('google.login');
@@ -44,39 +31,20 @@ Route::get('/auth/google',  [SSOController::class,'indexGoogle'])
 Route::get('/auth/google/callback', [SSOController::class, 'storeGoogle'])
     ->name('google.callback');
 
-
-
-
-Route::get('/login/facebook', [SSOController::class, 'indexFacebook'])
+Route::get('/auth/facebook', [SSOController::class, 'indexFacebook'])
     ->name('facebook.login');
-    
+
 Route::get('/auth/facebook/callback', [SSOController::class,'storeFacebook'])
     ->name('facebook.callback');
 
+// Short URL redirect - must be last to avoid catching other routes
+Route::get('/{slug}',  [LinkController::class, 'show'])
+    ->where('slug', '[A-Za-z0-9\-]+');
 
-
-    Route::get('/privacy-policy', function () {
-        return view('privacy-policy');
-    });
-    
-Route::get('/register',[UserController::class, 'index'])
-    ->name('register');
-Route::post('/register',[UserController::class, 'store'])
-    ->name('saveUserAccount');
-
-Route::get('/test',  [LinkController::class, 'test'] );
-
-Route::get('/qr',  [LinkController::class, 'testQR'] );
-
-
-Route::get('/{slug}',  [LinkController::class, 'show']   );
-
-Route::post('/check-slug',  [LinkController::class, 'checkSlug'] )
-    ->name('checkSlug');
-
-Route::get('/redirect-ad-page',  function (Request $request) {
-    return view('redirectAdPage');
-})->name('redirectAdPage');
+// Catch all route for Vue SPA - must be absolutely last
+Route::get('/{any}', function () {
+    return view('app');
+})->where('any', '.*');
 
 
 

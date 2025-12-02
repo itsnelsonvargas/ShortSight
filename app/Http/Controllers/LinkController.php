@@ -80,12 +80,23 @@ class LinkController extends Controller
 
 
         /**
-         * Return the SLUG and URL to the view
+         * Return the SLUG and URL
          */
         $data = [
             'newSlug'       => $slug,
             'submittedUrl'  => $request->url,
+            'short_url'     => url($slug),
         ];
+
+        // Return JSON for API requests
+        if ($request->expectsJson() || $request->is('api/*')) {
+            return response()->json([
+                'success' => true,
+                'slug' => $slug,
+                'short_url' => url($slug),
+                'original_url' => $request->url,
+            ]);
+        }
 
         return view('welcome', compact('data'));
     }
@@ -101,33 +112,29 @@ class LinkController extends Controller
                 ->header('Content-Disposition', 'attachment; filename="qrcode.png"');
     }
 
-    public function show($id)
+    public function show($slug)
     {
         try {
-         
             //Look for the slug in the database
             $link = Link::where('slug', $slug)->firstOrFail();
-            
+
             //redirect to the URL based on the slug  (Can be viewed in the database)
-            return redirect($link->url); 
+            return redirect($link->url);
         } catch (\Exception $e) {
             //if no link is found, it will throw a 404 error
             return abort(404);
         }
-          
     }
 
     public function checkSlug(Request $request)
-    {    
+    {
         //Get the slug to validate
         $slug = $request->input('slug');
-       
 
         //Check if the slug is already used
-        $exists = \App\Models\Link::where('slug', $slug)->exists();  
-       
-        //dd(  $exists) ;
-        return response()->json(['exists' => $exists]);
+        $exists = \App\Models\Link::where('slug', $slug)->exists();
+
+        return response()->json(['available' => !$exists]);
     }
 
     public function edit($id)

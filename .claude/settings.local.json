@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(test:*)",
+      "Bash(npm run build:*)",
+      "Bash(php artisan serve:*)",
+      "Bash(npm run dev:*)",
+      "Bash(composer install:*)",
+      "Bash(php artisan key:generate)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
