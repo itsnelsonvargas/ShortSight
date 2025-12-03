@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: shortsight_app
+    restart: unless-stopped
+    ports:
+      - "8000:80"
+    environment:
+      - APP_NAME=ShortSight
+      - APP_ENV=production
+      - APP_DEBUG=false
+      - APP_URL=http://localhost:8000
+      - DB_CONNECTION=mysql
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_DATABASE=shortsight
+      - DB_USERNAME=shortsight
+      - DB_PASSWORD=secret
+    volumes:
+      - ./storage:/var/www/html/storage
+      - ./bootstrap/cache:/var/www/html/bootstrap/cache
+    depends_on:
+      - db
+    networks:
+      - shortsight
+
+  db:
+    image: mysql:8.0
+    container_name: shortsight_db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: shortsight
+      MYSQL_USER: shortsight
+      MYSQL_PASSWORD: secret
+      MYSQL_ROOT_PASSWORD: root_secret
+    volumes:
+      - db_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    networks:
+      - shortsight
+
+  redis:
+    image: redis:7-alpine
+    container_name: shortsight_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    networks:
+      - shortsight
+
+networks:
+  shortsight:
+    driver: bridge
+
+volumes:
+  db_data:
+    driver: local
