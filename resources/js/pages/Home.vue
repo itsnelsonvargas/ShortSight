@@ -148,7 +148,8 @@
                 <h3 class="text-2xl font-bold text-slate-800 mb-2">Link ready!</h3>
                 <p class="text-slate-500 mb-8">Your long URL has been successfully shortened.</p>
 
-                <div class="bg-slate-50 border border-slate-200 rounded-xl p-2 flex flex-col md:flex-row items-center gap-2 mb-8">
+                <!-- Short URL Card -->
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-2 flex flex-col md:flex-row items-center gap-2 mb-6">
                   <div class="flex-1 text-left px-4 py-2 truncate w-full">
                     <a :href="result.shortUrl" target="_blank" class="text-indigo-600 font-bold text-xl hover:underline truncate block">
                       {{ result.shortUrl }}
@@ -161,10 +162,25 @@
                       {{ copied ? 'Copied!' : 'Copy' }}
                     </button>
                     <button class="p-3 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors border border-transparent hover:border-indigo-100">
-                      <i class="ph ph-qr-code text-xl"></i>
-                    </button>
-                    <button class="p-3 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors border border-transparent hover:border-indigo-100">
                       <i class="ph ph-share-network text-xl"></i>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- QR Code Section -->
+                <div v-if="qrCodeUrl" class="bg-white border-2 border-indigo-100 rounded-2xl p-6 mb-6">
+                  <div class="flex flex-col items-center">
+                    <h4 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                      <i class="ph ph-qr-code text-indigo-600 text-2xl"></i>
+                      QR Code
+                    </h4>
+                    <div class="bg-white p-4 rounded-xl shadow-lg mb-4">
+                      <img :src="qrCodeUrl" alt="QR Code" class="w-48 h-48 mx-auto" />
+                    </div>
+                    <p class="text-sm text-slate-500 mb-4">Scan to access your short link</p>
+                    <button @click="downloadQRCode" class="px-6 py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-colors flex items-center gap-2 shadow-lg shadow-indigo-500/30">
+                      <i class="ph ph-download text-xl"></i>
+                      Download QR Code (PNG)
                     </button>
                   </div>
                 </div>
@@ -330,6 +346,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
 import confetti from 'canvas-confetti';
+import QRCode from 'qrcode';
 
 const url = ref('');
 const customSlug = ref('');
@@ -340,6 +357,7 @@ const showOptions = ref(false);
 const isScrolled = ref(false);
 const showLoginModal = ref(false);
 const mobileMenuOpen = ref(false);
+const qrCodeUrl = ref('');
 
 // Mock Auth State
 const isAuthenticated = ref(false);
@@ -375,20 +393,36 @@ const logout = () => {
   isAuthenticated.value = false;
 };
 
-const shortenUrl = () => {
+const shortenUrl = async () => {
   if (!url.value) return;
   loading.value = true;
 
-  setTimeout(() => {
+  setTimeout(async () => {
     const code = customSlug.value || Math.random().toString(36).substring(7);
+    const shortUrl = `short.sight/${code}`;
     const newLink = {
       originalUrl: url.value,
-      shortUrl: `short.sight/${code}`,
+      shortUrl: shortUrl,
       clicks: 0,
       date: new Date().toLocaleDateString(),
     };
 
     result.value = newLink;
+
+    // Generate QR Code automatically
+    try {
+      qrCodeUrl.value = await QRCode.toDataURL(`https://${shortUrl}`, {
+        width: 300,
+        margin: 2,
+        color: {
+          dark: '#4f46e5', // Indigo color
+          light: '#ffffff'
+        }
+      });
+    } catch (error) {
+      console.error('Error generating QR code:', error);
+    }
+
     loading.value = false;
 
     history.value.unshift(newLink);
@@ -410,6 +444,7 @@ const resetForm = () => {
   result.value = null;
   copied.value = false;
   showOptions.value = false;
+  qrCodeUrl.value = '';
 };
 
 const copyToClipboard = () => {
@@ -421,6 +456,18 @@ const copyToClipboard = () => {
 
 const copyHistoryItem = (text) => {
   navigator.clipboard.writeText(text);
+};
+
+const downloadQRCode = () => {
+  if (!qrCodeUrl.value) return;
+
+  // Create a temporary link element
+  const link = document.createElement('a');
+  link.href = qrCodeUrl.value;
+  link.download = `qr-${result.value.shortUrl.replace('/', '-')}.png`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 };
 </script>
 
