@@ -386,6 +386,8 @@ const simulateLogin = () => {
     isAuthenticated.value = true;
     showLoginModal.value = false;
     loading.value = false;
+    // Redirect to dashboard after login
+    window.location.href = '/dashboard';
   }, 1000);
 };
 
