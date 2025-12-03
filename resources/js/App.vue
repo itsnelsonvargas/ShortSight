@@ -1,11 +1,11 @@
 <template>
-    <div id="app" class="min-h-screen bg-gray-50">
-        <router-view />
-    </div>
+  <div class="min-h-screen">
+    <router-view />
+  </div>
 </template>
 
 <script>
 export default {
-    name: 'App',
+  name: 'App',
 };
 </script>

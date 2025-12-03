@@ -23,6 +23,11 @@ use App\Http\Controllers\UserController;
 |
 */
 
+// Vue SPA - Homepage
+Route::get('/', function () {
+    return view('app');
+})->name('home');
+
 // SSO Routes
 Route::get('/auth/google',  [SSOController::class,'indexGoogle'])
     ->middleware('throttle:3,5')

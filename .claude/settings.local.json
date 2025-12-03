@@ -7,7 +7,11 @@
       "Bash(php artisan serve:*)",
       "Bash(npm run dev:*)",
       "Bash(composer install:*)",
-      "Bash(php artisan key:generate)"
+      "Bash(php artisan key:generate)",
+      "mcp__ide__getDiagnostics",
+      "Bash(taskkill:*)",
+      "Bash(cat:*)",
+      "Bash(git add:*)"
     ],
     "deny": [],
     "ask": []
