@@ -389,24 +389,60 @@ const stats = ref({
 
 // Chart data
 const selectedPeriod = ref('7d');
-const chartData = ref({
-  labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+
+// Mock data for different time periods
+const chartDatasets = {
+  '7d': {
+    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+    data: [320, 445, 380, 510, 475, 620, 590]
+  },
+  '30d': {
+    labels: Array.from({length: 30}, (_, i) => {
+      const date = new Date();
+      date.setDate(date.getDate() - (29 - i));
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    }),
+    data: Array.from({length: 30}, (_, i) => {
+      // Create a pattern with higher clicks on weekdays
+      const baseClicks = 300 + Math.sin(i / 7 * 2 * Math.PI) * 100;
+      const dayOfWeek = i % 7;
+      const weekdayBonus = (dayOfWeek >= 0 && dayOfWeek <= 4) ? 150 : -50;
+      return Math.floor(baseClicks + weekdayBonus + Math.random() * 100);
+    })
+  },
+  '90d': {
+    labels: Array.from({length: 13}, (_, i) => {
+      const date = new Date();
+      date.setDate(date.getDate() - (89 - i * 7));
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    }),
+    data: Array.from({length: 13}, (_, i) => {
+      // Create weekly trends with realistic patterns
+      const baseClicks = 2000 + Math.sin(i / 13 * 2 * Math.PI) * 500;
+      const weeklyPattern = (i % 4 === 0) ? 800 : 0; // Higher clicks every 4 weeks
+      return Math.floor(baseClicks + weeklyPattern + Math.random() * 300);
+    })
+  }
+};
+
+const chartData = computed(() => ({
+  labels: chartDatasets[selectedPeriod.value].labels,
   datasets: [
     {
       label: 'Clicks',
-      data: [320, 445, 380, 510, 475, 620, 590],
+      data: chartDatasets[selectedPeriod.value].data,
       borderColor: '#4f46e5',
       backgroundColor: 'rgba(79, 70, 229, 0.1)',
       tension: 0.4,
       fill: true,
-      pointRadius: 4,
-      pointHoverRadius: 6,
+      pointRadius: selectedPeriod.value === '7d' ? 4 : 2,
+      pointHoverRadius: selectedPeriod.value === '7d' ? 6 : 4,
       pointBackgroundColor: '#4f46e5',
       pointBorderColor: '#fff',
       pointBorderWidth: 2,
     }
   ]
-});
+}));
 
 const chartOptions = ref({
   responsive: true,

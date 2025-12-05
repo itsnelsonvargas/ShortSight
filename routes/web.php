@@ -42,11 +42,12 @@ Route::get('/auth/facebook', [SSOController::class, 'indexFacebook'])
 Route::get('/auth/facebook/callback', [SSOController::class,'storeFacebook'])
     ->name('facebook.callback');
 
-// Short URL redirect - must be last to avoid catching other routes
+// Short URL redirect - must be first with specific constraints
 Route::get('/{slug}',  [LinkController::class, 'show'])
-    ->where('slug', '[A-Za-z0-9\-]+');
+    ->where('slug', '[A-Za-z0-9\-]{3,}')
+    ->where('slug', '^(?!dashboard|login|register|auth|api).*$');
 
-// Catch all route for Vue SPA - must be absolutely last
+// Catch all route for Vue SPA - must be last
 Route::get('/{any}', function () {
     return view('app');
 })->where('any', '.*');

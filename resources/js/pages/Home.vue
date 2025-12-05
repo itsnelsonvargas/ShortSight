@@ -676,7 +676,7 @@ const mobileMenuOpen = ref(false);
 const qrCodeUrl = ref('');
 
 // Mock Auth State
-const isAuthenticated = ref(false);
+const isAuthenticated = ref(true);
 const user = ref({ name: 'Alex Doe' });
 
 // History stored in LocalStorage
