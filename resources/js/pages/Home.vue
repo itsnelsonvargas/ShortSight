@@ -625,7 +625,25 @@
       </div>
     </section>
 
-    <!-- Footer -->
+    <!-- Developer Section -->
+    <section class="py-8 bg-slate-50 border-t border-slate-200">
+      <div class="container mx-auto px-4">
+        <div class="text-center">
+          <p class="text-sm text-slate-500">
+            Crafted with <span class="text-red-500">♥</span> by
+            <a href="#" class="text-indigo-600 hover:text-indigo-700 font-medium transition-colors">
+              Nelson
+            </a>
+            <span class="mx-2">•</span>
+            <a href="https://github.com/yourusername/shortsight" target="_blank" class="text-slate-400 hover:text-slate-600 transition-colors text-xs">
+              <i class="ph ph-linkedin-logo"></i> View Source
+            </a>
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer --> 
     <footer class="bg-white border-t border-slate-200 py-12">
       <div class="container mx-auto px-4 text-center">
         <div class="flex items-center justify-center gap-2 mb-4 opacity-50">
