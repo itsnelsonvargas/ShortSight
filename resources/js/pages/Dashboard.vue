@@ -158,6 +158,16 @@
               <button class="p-2 bg-slate-50 border border-slate-200 rounded-lg hover:bg-slate-100 transition-colors">
                 <i class="ph ph-funnel text-slate-600"></i>
               </button>
+              <button
+                @click="showInactiveLinks = !showInactiveLinks"
+                :class="[
+                  'px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2',
+                  showInactiveLinks ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                ]"
+              >
+                <i :class="showInactiveLinks ? 'ph ph-eye' : 'ph ph-eye-slash'"></i>
+                {{ showInactiveLinks ? 'Show All' : 'Active Only' }}
+              </button>
             </div>
           </div>
         </div>
@@ -202,7 +212,10 @@
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-100">
-              <tr v-for="link in filteredLinks" :key="link.id" class="hover:bg-slate-50 transition-colors">
+              <tr v-for="link in filteredLinks" :key="link.id" :class="[
+                'hover:bg-slate-50 transition-colors',
+                link.status === 'inactive' ? 'opacity-75' : ''
+              ]">
                 <td class="px-6 py-4">
                   <input
                     type="checkbox"
@@ -213,12 +226,32 @@
                 </td>
                 <td class="px-6 py-4">
                   <div class="flex items-center gap-2">
-                    <a :href="link.shortUrl" target="_blank" class="text-indigo-600 font-semibold hover:underline">
+                    <span v-if="link.status === 'inactive'" class="text-slate-500 font-semibold line-through">
+                      {{ link.shortUrl }}
+                    </span>
+                    <a
+                      v-else
+                      :href="link.shortUrl"
+                      target="_blank"
+                      class="text-indigo-600 font-semibold hover:underline"
+                    >
                       {{ link.shortUrl }}
                     </a>
-                    <button @click="copyLink(link.shortUrl)" class="p-1 text-slate-400 hover:text-indigo-600 transition-colors">
+                    <button
+                      @click="copyLink(link.shortUrl)"
+                      :disabled="link.status === 'inactive'"
+                      :class="[
+                        'p-1 transition-colors',
+                        link.status === 'inactive'
+                          ? 'text-slate-300 cursor-not-allowed'
+                          : 'text-slate-400 hover:text-indigo-600'
+                      ]"
+                    >
                       <i class="ph ph-copy text-sm"></i>
                     </button>
+                    <span v-if="link.status === 'inactive'" class="text-xs text-slate-400 bg-slate-100 px-2 py-0.5 rounded">
+                      Disabled
+                    </span>
                   </div>
                 </td>
                 <td class="px-6 py-4 hidden lg:table-cell">
@@ -235,13 +268,20 @@
                   <span class="text-sm text-slate-600">{{ link.date }}</span>
                 </td>
                 <td class="px-6 py-4">
-                  <span :class="[
-                    'inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold',
-                    link.status === 'active' ? 'bg-green-50 text-green-700' : 'bg-slate-100 text-slate-600'
-                  ]">
-                    <span class="w-1.5 h-1.5 rounded-full" :class="link.status === 'active' ? 'bg-green-500' : 'bg-slate-400'"></span>
-                    {{ link.status }}
-                  </span>
+                  <button
+                    @click="toggleLinkStatus(link)"
+                    :class="[
+                      'inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold transition-all duration-200',
+                      link.status === 'active'
+                        ? 'bg-green-50 text-green-700 hover:bg-green-100'
+                        : 'bg-red-50 text-red-700 hover:bg-red-100'
+                    ]"
+                    :title="link.status === 'active' ? 'Click to disable link' : 'Click to enable link'"
+                  >
+                    <span class="w-1.5 h-1.5 rounded-full" :class="link.status === 'active' ? 'bg-green-500' : 'bg-red-500'"></span>
+                    {{ link.status === 'active' ? 'Active' : 'Disabled' }}
+                    <i :class="link.status === 'active' ? 'ph ph-eye' : 'ph ph-eye-slash'" class="text-xs"></i>
+                  </button>
                 </td>
                 <td class="px-6 py-4 text-right">
                   <div class="flex items-center justify-end gap-2">
@@ -667,7 +707,7 @@ const links = ref([
     clicks: 1920,
     clickTrend: -5,
     date: '2024-11-20',
-    status: 'active'
+    status: 'inactive'
   },
   {
     id: 4,
@@ -685,7 +725,7 @@ const links = ref([
     clicks: 1016,
     clickTrend: 0,
     date: '2024-11-15',
-    status: 'active'
+    status: 'inactive'
   }
 ]);
 
@@ -693,6 +733,7 @@ const links = ref([
 const searchQuery = ref('');
 const sortField = ref('clicks');
 const sortDirection = ref('desc');
+const showInactiveLinks = ref(true);
 
 // Link selection
 const selectedLinks = ref([]);
@@ -701,6 +742,11 @@ const analyticsPeriod = ref('7d');
 
 const filteredLinks = computed(() => {
   let result = links.value;
+
+  // Status filter
+  if (!showInactiveLinks.value) {
+    result = result.filter(link => link.status === 'active');
+  }
 
   // Search filter
   if (searchQuery.value) {
@@ -962,6 +1008,15 @@ const toggleSelectAll = () => {
 
 const clearSelection = () => {
   selectedLinks.value = [];
+};
+
+const toggleLinkStatus = (link) => {
+  // Toggle between 'active' and 'inactive'
+  link.status = link.status === 'active' ? 'inactive' : 'active';
+
+  // In a real app, this would make an API call to update the status
+  // For now, we'll just update the local state
+  console.log(`Link ${link.shortUrl} status changed to: ${link.status}`);
 };
 
 const viewSelectedAnalytics = () => {
