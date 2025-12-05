@@ -277,6 +277,322 @@
       </div>
     </section>
 
+    <!-- Comparison Table -->
+    <section class="py-20 bg-slate-50">
+      <div class="container mx-auto px-4">
+        <div class="text-center mb-16">
+          <h2 class="text-3xl font-bold text-slate-900 mb-4">Feature Comparison</h2>
+          <p class="text-slate-600 max-w-2xl mx-auto">See how ShortSight compares to the competition.</p>
+        </div>
+
+        <div class="max-w-6xl mx-auto">
+          <div class="bg-white rounded-2xl shadow-lg shadow-slate-200/50 overflow-hidden border border-slate-200">
+            <!-- Table Content -->
+            <div class="overflow-x-auto">
+              <table class="w-full">
+                <thead class="bg-slate-50 border-b border-slate-200">
+                  <tr>
+                    <th class="text-left py-6 px-6 font-semibold text-slate-700 text-sm uppercase tracking-wider">Feature</th>
+                    <th class="text-center py-6 px-4 font-semibold text-slate-700">ShortSight</th>
+                    <th class="text-center py-6 px-4 font-semibold text-slate-600">bit.ly</th>
+                    <th class="text-center py-6 px-4 font-semibold text-slate-600">TinyURL</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <!-- Speed -->
+                  <tr class="border-b border-slate-100 hover:bg-slate-50/30 transition-colors">
+                    <td class="py-5 px-6 font-medium text-slate-900">
+                      <div class="flex items-center gap-3">
+                        <i class="ph ph-lightning text-slate-400 text-lg"></i>
+                        Speed & Performance
+                      </div>
+                    </td>
+                    <td class="text-center py-5 px-4">
+                      <div class="flex flex-col items-center gap-1">
+                        <div class="flex items-center gap-1 text-green-600 font-medium">
+                          <i class="ph ph-check text-lg"></i>
+                          <span class="text-sm">Lightning Fast</span>
+                        </div>
+                        <span class="text-xs text-slate-500">Global CDN</span>
+                      </div>
+                    </td>
+                    <td class="text-center py-5 px-4">
+                      <div class="flex items-center gap-1 text-slate-600 font-medium">
+                        <i class="ph ph-check text-lg"></i>
+                        <span class="text-sm">Good</span>
+                      </div>
+                    </td>
+                    <td class="text-center py-5 px-4">
+                      <div class="flex items-center gap-1 text-slate-600 font-medium">
+                        <i class="ph ph-check text-lg"></i>
+                        <span class="text-sm">Average</span>
+                      </div>
+                    </td>
+                  </tr>
+
+                  <!-- Security -->
+                  <tr class="border-b border-slate-100 hover:bg-slate-50/30 transition-colors">
+                    <td class="py-5 px-6 font-medium text-slate-900">
+                      <div class="flex items-center gap-3">
+                        <i class="ph ph-shield-check text-slate-400 text-lg"></i>
+                        Security & Safety
+                      </div>
+                    </td>
+                    <td class="text-center py-5 px-4">
+                      <div class="flex flex-col items-center gap-1">
+                        <div class="flex items-center gap-1 text-green-600 font-medium">
+                          <i class="ph ph-check text-lg"></i>
+                          <span class="text-sm">Advanced</span>
+                        </div>
+                        <span class="text-xs text-slate-500">Malware protection + HTTPS</span>
+                      </div>
+                    </td>
+                    <td class="text-center py-5 px-4">
+                      <div class="flex items-center gap-1 text-slate-600 font-medium">
+                        <i class="ph ph-check text-lg"></i>
+                        <span class="text-sm">Basic</span>
+                      </div>
+                    </td>
+                    <td class="text-center py-5 px-4">
+                      <div class="flex items-center gap-1 text-slate-500 font-medium">
+                        <i class="ph ph-minus text-lg"></i>
+                        <span class="text-sm">Limited</span>
+                      </div>
+                    </td>
+                  </tr>
+
+                  <!-- Analytics -->
+                  <tr class="border-b border-slate-100 hover:bg-slate-50/30 transition-colors">
+                    <td class="py-5 px-6 font-medium text-slate-900">
+                      <div class="flex items-center gap-3">
+                        <i class="ph ph-chart-line-up text-slate-400 text-lg"></i>
+                        Analytics & Insights
+                      </div>
+                    </td>
+                    <td class="text-center py-5 px-4">
+                      <div class="flex flex-col items-center gap-1">
+                        <div class="flex items-center gap-1 text-green-600 font-medium">
+                          <i class="ph ph-check text-lg"></i>
+                          <span class="text-sm">Comprehensive</span>
+                        </div>
+                        <span class="text-xs text-slate-500">Real-time + Geo/Device data</span>
+                      </div>
+                    </td>
+                    <td class="text-center py-5 px-4">
+                      <div class="flex items-center gap-1 text-slate-600 font-medium">
+                        <i class="ph ph-check text-lg"></i>
+                        <span class="text-sm">Advanced</span>
+                      </div>
+                    </td>
+                    <td class="text-center py-5 px-4">
+                      <div class="flex items-center gap-1 text-red-500 font-medium">
+                        <i class="ph ph-x text-lg"></i>
+                        <span class="text-sm">None</span>
+                      </div>
+                    </td>
+                  </tr>
+
+                  <!-- Custom Aliases -->
+                  <tr class="border-b border-slate-100 hover:bg-slate-50/30 transition-colors">
+                    <td class="py-5 px-6 font-medium text-slate-900">
+                      <div class="flex items-center gap-3">
+                        <i class="ph ph-link text-slate-400 text-lg"></i>
+                        Custom Aliases
+                      </div>
+                    </td>
+                    <td class="text-center py-5 px-4">
+                      <div class="flex flex-col items-center gap-1">
+                        <div class="flex items-center gap-1 text-green-600 font-medium">
+                          <i class="ph ph-check text-lg"></i>
+                          <span class="text-sm">Unlimited</span>
+                        </div>
+                        <span class="text-xs text-slate-500">Branded & memorable</span>
+                      </div>
+                    </td>
+                    <td class="text-center py-5 px-4">
+                      <div class="flex items-center gap-1 text-slate-600 font-medium">
+                        <i class="ph ph-check text-lg"></i>
+                        <span class="text-sm">Paid plans</span>
+                      </div>
+                    </td>
+                    <td class="text-center py-5 px-4">
+                      <div class="flex items-center gap-1 text-red-500 font-medium">
+                        <i class="ph ph-x text-lg"></i>
+                        <span class="text-sm">Not available</span>
+                      </div>
+                    </td>
+                  </tr>
+
+                  <!-- QR Codes -->
+                  <tr class="border-b border-slate-100 hover:bg-slate-50/30 transition-colors">
+                    <td class="py-5 px-6 font-medium text-slate-900">
+                      <div class="flex items-center gap-3">
+                        <i class="ph ph-qr-code text-slate-400 text-lg"></i>
+                        QR Code Generation
+                      </div>
+                    </td>
+                    <td class="text-center py-5 px-4">
+                      <div class="flex flex-col items-center gap-1">
+                        <div class="flex items-center gap-1 text-green-600 font-medium">
+                          <i class="ph ph-check text-lg"></i>
+                          <span class="text-sm">Instant</span>
+                        </div>
+                        <span class="text-xs text-slate-500">Auto-generated + Downloadable</span>
+                      </div>
+                    </td>
+                    <td class="text-center py-5 px-4">
+                      <div class="flex items-center gap-1 text-slate-600 font-medium">
+                        <i class="ph ph-check text-lg"></i>
+                        <span class="text-sm">Available</span>
+                      </div>
+                    </td>
+                    <td class="text-center py-5 px-4">
+                      <div class="flex items-center gap-1 text-red-500 font-medium">
+                        <i class="ph ph-x text-lg"></i>
+                        <span class="text-sm">Not available</span>
+                      </div>
+                    </td>
+                  </tr>
+
+                  <!-- API Access -->
+                  <tr class="border-b border-slate-100 hover:bg-slate-50/30 transition-colors">
+                    <td class="py-5 px-6 font-medium text-slate-900">
+                      <div class="flex items-center gap-3">
+                        <i class="ph ph-code text-slate-400 text-lg"></i>
+                        API Access
+                      </div>
+                    </td>
+                    <td class="text-center py-5 px-4">
+                      <div class="flex flex-col items-center gap-1">
+                        <div class="flex items-center gap-1 text-green-600 font-medium">
+                          <i class="ph ph-check text-lg"></i>
+                          <span class="text-sm">Full REST API</span>
+                        </div>
+                        <span class="text-xs text-slate-500">Pro plan</span>
+                      </div>
+                    </td>
+                    <td class="text-center py-5 px-4">
+                      <div class="flex items-center gap-1 text-slate-600 font-medium">
+                        <i class="ph ph-check text-lg"></i>
+                        <span class="text-sm">Available</span>
+                      </div>
+                    </td>
+                    <td class="text-center py-5 px-4">
+                      <div class="flex items-center gap-1 text-slate-500 font-medium">
+                        <i class="ph ph-minus text-lg"></i>
+                        <span class="text-sm">Limited</span>
+                      </div>
+                    </td>
+                  </tr>
+
+                  <!-- Pricing -->
+                  <tr class="border-b border-slate-100 hover:bg-slate-50/30 transition-colors">
+                    <td class="py-5 px-6 font-medium text-slate-900">
+                      <div class="flex items-center gap-3">
+                        <i class="ph ph-money text-slate-400 text-lg"></i>
+                        Pricing
+                      </div>
+                    </td>
+                    <td class="text-center py-5 px-4">
+                      <div class="flex flex-col items-center gap-1">
+                        <div class="flex items-center gap-1 text-green-600 font-medium">
+                          <i class="ph ph-check text-lg"></i>
+                          <span class="text-sm">$0 - $12/mo</span>
+                        </div>
+                        <span class="text-xs text-slate-500">Free forever plan</span>
+                      </div>
+                    </td>
+                    <td class="text-center py-5 px-4">
+                      <div class="flex items-center gap-1 text-slate-600 font-medium">
+                        <i class="ph ph-check text-lg"></i>
+                        <span class="text-sm">$29+/mo</span>
+                      </div>
+                    </td>
+                    <td class="text-center py-5 px-4">
+                      <div class="flex items-center gap-1 text-slate-600 font-medium">
+                        <i class="ph ph-check text-lg"></i>
+                        <span class="text-sm">Free</span>
+                      </div>
+                    </td>
+                  </tr>
+
+                  <!-- UI/UX -->
+                  <tr class="border-b border-slate-100 hover:bg-slate-50/30 transition-colors">
+                    <td class="py-5 px-6 font-medium text-slate-900">
+                      <div class="flex items-center gap-3">
+                        <i class="ph ph-palette text-slate-400 text-lg"></i>
+                        User Interface
+                      </div>
+                    </td>
+                    <td class="text-center py-5 px-4">
+                      <div class="flex flex-col items-center gap-1">
+                        <div class="flex items-center gap-1 text-green-600 font-medium">
+                          <i class="ph ph-check text-lg"></i>
+                          <span class="text-sm">Modern & Intuitive</span>
+                        </div>
+                        <span class="text-xs text-slate-500">Glassmorphism design</span>
+                      </div>
+                    </td>
+                    <td class="text-center py-5 px-4">
+                      <div class="flex items-center gap-1 text-slate-600 font-medium">
+                        <i class="ph ph-check text-lg"></i>
+                        <span class="text-sm">Functional</span>
+                      </div>
+                    </td>
+                    <td class="text-center py-5 px-4">
+                      <div class="flex items-center gap-1 text-slate-500 font-medium">
+                        <i class="ph ph-minus text-lg"></i>
+                        <span class="text-sm">Basic</span>
+                      </div>
+                    </td>
+                  </tr>
+
+                  <!-- Uptime -->
+                  <tr class="hover:bg-slate-50/30 transition-colors">
+                    <td class="py-5 px-6 font-medium text-slate-900">
+                      <div class="flex items-center gap-3">
+                        <i class="ph ph-activity text-slate-400 text-lg"></i>
+                        Uptime Reliability
+                      </div>
+                    </td>
+                    <td class="text-center py-5 px-4">
+                      <div class="flex flex-col items-center gap-1">
+                        <div class="flex items-center gap-1 text-green-600 font-medium">
+                          <i class="ph ph-check text-lg"></i>
+                          <span class="text-sm">99.9%</span>
+                        </div>
+                        <span class="text-xs text-slate-500">SLA guaranteed</span>
+                      </div>
+                    </td>
+                    <td class="text-center py-5 px-4">
+                      <div class="flex items-center gap-1 text-slate-600 font-medium">
+                        <i class="ph ph-check text-lg"></i>
+                        <span class="text-sm">99.9%</span>
+                      </div>
+                    </td>
+                    <td class="text-center py-5 px-4">
+                      <div class="flex items-center gap-1 text-slate-500 font-medium">
+                        <i class="ph ph-minus text-lg"></i>
+                        <span class="text-sm">Not specified</span>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Call to Action -->
+            <div class="bg-slate-50 p-8 text-center border-t border-slate-200">
+              <p class="text-slate-600 mb-4">Join thousands of creators who trust ShortSight for their link shortening needs.</p>
+              <button @click="showLoginModal = true" class="px-6 py-3 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 transition-colors">
+                Get Started Today
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- Pricing (Simplified) -->
     <section id="pricing" class="py-20 bg-slate-50 border-t border-slate-200">
       <div class="container mx-auto px-4 text-center">
