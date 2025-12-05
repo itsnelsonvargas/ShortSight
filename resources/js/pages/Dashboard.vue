@@ -120,7 +120,29 @@
       <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
         <div class="p-6 border-b border-slate-200">
           <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <h2 class="text-xl font-bold text-slate-900">Your Links</h2>
+            <div class="flex items-center gap-4">
+              <h2 class="text-xl font-bold text-slate-900">Your Links</h2>
+              <span v-if="selectedLinks.length > 0" class="text-sm text-slate-500">
+                {{ selectedLinks.length }} selected
+              </span>
+            </div>
+
+            <!-- Actions for selected links -->
+            <div v-if="selectedLinks.length > 0" class="flex gap-2">
+              <button
+                @click="viewSelectedAnalytics"
+                class="px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors flex items-center gap-2"
+              >
+                <i class="ph ph-chart-bar"></i>
+                View Analytics
+              </button>
+              <button
+                @click="clearSelection"
+                class="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg font-medium hover:bg-slate-200 transition-colors"
+              >
+                Clear Selection
+              </button>
+            </div>
 
             <!-- Search and Filter -->
             <div class="flex gap-2 w-full sm:w-auto">
@@ -145,6 +167,15 @@
           <table class="w-full">
             <thead class="bg-slate-50 border-b border-slate-200">
               <tr>
+                <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider w-12">
+                  <input
+                    type="checkbox"
+                    :checked="selectedLinks.length === filteredLinks.length && filteredLinks.length > 0"
+                    :indeterminate="selectedLinks.length > 0 && selectedLinks.length < filteredLinks.length"
+                    @change="toggleSelectAll"
+                    class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                  >
+                </th>
                 <th class="text-left px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">
                   <button @click="sortBy('shortUrl')" class="flex items-center gap-1 hover:text-slate-700">
                     Short Link
@@ -172,6 +203,14 @@
             </thead>
             <tbody class="divide-y divide-slate-100">
               <tr v-for="link in filteredLinks" :key="link.id" class="hover:bg-slate-50 transition-colors">
+                <td class="px-6 py-4">
+                  <input
+                    type="checkbox"
+                    :checked="isSelected(link.id)"
+                    @change="toggleLinkSelection(link)"
+                    class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                  >
+                </td>
                 <td class="px-6 py-4">
                   <div class="flex items-center gap-2">
                     <a :href="link.shortUrl" target="_blank" class="text-indigo-600 font-semibold hover:underline">
@@ -223,6 +262,122 @@
               </tr>
             </tbody>
           </table>
+        </div>
+
+        <!-- Selected Links Analytics Modal -->
+        <div v-if="showAnalyticsModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" @click="showAnalyticsModal = false"></div>
+          <div class="bg-white rounded-3xl max-w-6xl w-full max-h-[90vh] overflow-hidden relative z-10 shadow-2xl">
+            <div class="flex items-center justify-between p-6 border-b border-slate-200">
+              <h3 class="text-2xl font-bold text-slate-900">
+                Link Analytics
+                <span class="text-lg font-normal text-slate-500">({{ selectedLinks.length }} link{{ selectedLinks.length > 1 ? 's' : '' }})</span>
+              </h3>
+              <button @click="showAnalyticsModal = false" class="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">
+                <i class="ph ph-x text-xl"></i>
+              </button>
+            </div>
+
+            <div class="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
+              <!-- Selected Links Summary -->
+              <div class="grid grid-cols-1 md:grid-cols-{{ selectedLinks.length > 3 ? '2' : selectedLinks.length }} gap-4 mb-8">
+                <div v-for="link in selectedAnalyticsLinks" :key="link.id" class="bg-slate-50 rounded-xl p-4">
+                  <div class="flex items-center gap-3 mb-3">
+                    <div class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
+                      <i class="ph ph-link text-indigo-600"></i>
+                    </div>
+                    <div>
+                      <h4 class="font-semibold text-slate-900">{{ link.shortUrl }}</h4>
+                      <p class="text-sm text-slate-500 truncate max-w-xs">{{ link.originalUrl }}</p>
+                    </div>
+                  </div>
+                  <div class="grid grid-cols-2 gap-4">
+                    <div>
+                      <p class="text-2xl font-bold text-slate-900">{{ link.clicks.toLocaleString() }}</p>
+                      <p class="text-sm text-slate-500">Total Clicks</p>
+                    </div>
+                    <div>
+                      <p class="text-2xl font-bold text-green-600">{{ link.clickTrend }}%</p>
+                      <p class="text-sm text-slate-500">Trend</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Time Period Selector -->
+              <div class="flex items-center justify-between mb-6">
+                <h4 class="text-lg font-semibold text-slate-900">Click Trends</h4>
+                <div class="flex gap-2">
+                  <button
+                    v-for="period in ['7d', '30d', '90d']"
+                    :key="period"
+                    @click="analyticsPeriod = period"
+                    :class="[
+                      'px-4 py-2 rounded-lg text-sm font-medium transition-colors',
+                      analyticsPeriod === period
+                        ? 'bg-indigo-600 text-white'
+                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    ]"
+                  >
+                    {{ period }}
+                  </button>
+                </div>
+              </div>
+
+              <!-- Analytics Chart -->
+              <div class="bg-slate-50 rounded-xl p-6 mb-6">
+                <div class="h-80">
+                  <Line :data="analyticsChartData" :options="analyticsChartOptions" />
+                </div>
+              </div>
+
+              <!-- Geographic Data -->
+              <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Top Countries -->
+                <div class="bg-slate-50 rounded-xl p-6">
+                  <h4 class="text-lg font-semibold text-slate-900 mb-4">Top Countries</h4>
+                  <div class="space-y-3">
+                    <div v-for="country in topCountries" :key="country.name" class="flex items-center justify-between">
+                      <div class="flex items-center gap-3">
+                        <span class="text-sm font-medium text-slate-900">{{ country.name }}</span>
+                      </div>
+                      <div class="flex items-center gap-2">
+                        <div class="w-20 bg-slate-200 rounded-full h-2">
+                          <div
+                            class="bg-indigo-600 h-2 rounded-full"
+                            :style="{ width: (country.clicks / topCountries[0].clicks * 100) + '%' }"
+                          ></div>
+                        </div>
+                        <span class="text-sm font-medium text-slate-700">{{ country.clicks }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Device Breakdown -->
+                <div class="bg-slate-50 rounded-xl p-6">
+                  <h4 class="text-lg font-semibold text-slate-900 mb-4">Device Types</h4>
+                  <div class="space-y-4">
+                    <div v-for="device in deviceBreakdown" :key="device.type" class="flex items-center justify-between">
+                      <div class="flex items-center gap-3">
+                        <i :class="device.icon" class="text-slate-600"></i>
+                        <span class="text-sm font-medium text-slate-900">{{ device.type }}</span>
+                      </div>
+                      <div class="flex items-center gap-2">
+                        <div class="w-20 bg-slate-200 rounded-full h-2">
+                          <div
+                            class="bg-indigo-600 h-2 rounded-full"
+                            :style="{ width: device.percentage + '%' }"
+                          ></div>
+                        </div>
+                        <span class="text-sm font-medium text-slate-700">{{ device.percentage }}%</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- Pagination -->
@@ -539,6 +694,11 @@ const searchQuery = ref('');
 const sortField = ref('clicks');
 const sortDirection = ref('desc');
 
+// Link selection
+const selectedLinks = ref([]);
+const showAnalyticsModal = ref(false);
+const analyticsPeriod = ref('7d');
+
 const filteredLinks = computed(() => {
   let result = links.value;
 
@@ -564,6 +724,124 @@ const filteredLinks = computed(() => {
   });
 
   return result;
+});
+
+// Selected links analytics
+const selectedAnalyticsLinks = computed(() => {
+  return links.value.filter(link => selectedLinks.value.includes(link.id));
+});
+
+const analyticsChartData = computed(() => {
+  const datasets = selectedAnalyticsLinks.value.map((link, index) => {
+    const colors = ['#4f46e5', '#7c3aed', '#db2777', '#ea580c', '#16a34a'];
+    const color = colors[index % colors.length];
+
+    return {
+      label: link.shortUrl.split('/').pop(),
+      data: generateAnalyticsData(link, analyticsPeriod.value),
+      borderColor: color,
+      backgroundColor: color + '20',
+      tension: 0.4,
+      fill: false,
+      pointRadius: 3,
+      pointHoverRadius: 5,
+      pointBackgroundColor: color,
+      pointBorderColor: '#fff',
+      pointBorderWidth: 2,
+    };
+  });
+
+  return {
+    labels: getAnalyticsLabels(analyticsPeriod.value),
+    datasets
+  };
+});
+
+// Mock analytics data generation
+function generateAnalyticsData(link, period) {
+  const baseClicks = Math.floor(link.clicks / (period === '7d' ? 7 : period === '30d' ? 30 : 90));
+  const variation = 0.3; // 30% variation
+
+  if (period === '7d') {
+    return Array.from({length: 7}, () => Math.floor(baseClicks * (1 + (Math.random() - 0.5) * variation)));
+  } else if (period === '30d') {
+    return Array.from({length: 30}, (_, i) => {
+      const dayMultiplier = (i % 7 < 5) ? 1.5 : 0.8; // Higher on weekdays
+      return Math.floor(baseClicks * dayMultiplier * (1 + (Math.random() - 0.5) * variation));
+    });
+  } else {
+    return Array.from({length: 13}, () => Math.floor(baseClicks * 7 * (1 + (Math.random() - 0.5) * variation)));
+  }
+}
+
+function getAnalyticsLabels(period) {
+  if (period === '7d') {
+    return ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  } else if (period === '30d') {
+    return Array.from({length: 30}, (_, i) => `Day ${i + 1}`);
+  } else {
+    return Array.from({length: 13}, (_, i) => `Week ${i + 1}`);
+  }
+}
+
+// Mock geographic and device data
+const topCountries = [
+  { name: 'United States', clicks: 1250 },
+  { name: 'United Kingdom', clicks: 890 },
+  { name: 'Canada', clicks: 650 },
+  { name: 'Germany', clicks: 420 },
+  { name: 'Australia', clicks: 380 }
+];
+
+const deviceBreakdown = [
+  { type: 'Desktop', percentage: 55, icon: 'ph ph-monitor' },
+  { type: 'Mobile', percentage: 35, icon: 'ph ph-device-mobile' },
+  { type: 'Tablet', percentage: 10, icon: 'ph ph-tablet' }
+];
+
+const analyticsChartOptions = ref({
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: {
+      position: 'top',
+      labels: {
+        usePointStyle: true,
+        padding: 20
+      }
+    },
+    tooltip: {
+      backgroundColor: '#1e293b',
+      padding: 12,
+      borderRadius: 8,
+      titleFont: {
+        size: 14,
+        weight: 'bold'
+      },
+      bodyFont: {
+        size: 13
+      }
+    }
+  },
+  scales: {
+    y: {
+      beginAtZero: true,
+      grid: {
+        color: '#f1f5f9'
+      },
+      ticks: {
+        color: '#64748b'
+      }
+    },
+    x: {
+      grid: {
+        display: false
+      },
+      ticks: {
+        color: '#64748b'
+      }
+    }
+  }
 });
 
 // Modals
@@ -658,6 +936,38 @@ const downloadQR = async (link) => {
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
+};
+
+// Link selection functions
+const isSelected = (linkId) => {
+  return selectedLinks.value.includes(linkId);
+};
+
+const toggleLinkSelection = (link) => {
+  const index = selectedLinks.value.indexOf(link.id);
+  if (index > -1) {
+    selectedLinks.value.splice(index, 1);
+  } else {
+    selectedLinks.value.push(link.id);
+  }
+};
+
+const toggleSelectAll = () => {
+  if (selectedLinks.value.length === filteredLinks.value.length) {
+    selectedLinks.value = [];
+  } else {
+    selectedLinks.value = filteredLinks.value.map(link => link.id);
+  }
+};
+
+const clearSelection = () => {
+  selectedLinks.value = [];
+};
+
+const viewSelectedAnalytics = () => {
+  if (selectedLinks.value.length > 0) {
+    showAnalyticsModal.value = true;
+  }
 };
 
 const logout = () => {
