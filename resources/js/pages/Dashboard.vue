@@ -214,7 +214,7 @@
             <tbody class="divide-y divide-slate-100">
               <tr v-for="link in filteredLinks" :key="link.id" :class="[
                 'hover:bg-slate-50 transition-colors',
-                link.status === 'inactive' ? 'opacity-75' : ''
+                link.is_disabled ? 'opacity-75' : ''
               ]">
                 <td class="px-6 py-4">
                   <input
@@ -226,7 +226,7 @@
                 </td>
                 <td class="px-6 py-4">
                   <div class="flex items-center gap-2">
-                    <span v-if="link.status === 'inactive'" class="text-slate-500 font-semibold line-through">
+                    <span v-if="link.is_disabled" class="text-slate-500 font-semibold line-through">
                       {{ link.shortUrl }}
                     </span>
                     <a
@@ -239,17 +239,17 @@
                     </a>
                     <button
                       @click="copyLink(link.shortUrl)"
-                      :disabled="link.status === 'inactive'"
+                      :disabled="link.is_disabled"
                       :class="[
                         'p-1 transition-colors',
-                        link.status === 'inactive'
+                        link.is_disabled
                           ? 'text-slate-300 cursor-not-allowed'
                           : 'text-slate-400 hover:text-indigo-600'
                       ]"
                     >
                       <i class="ph ph-copy text-sm"></i>
                     </button>
-                    <span v-if="link.status === 'inactive'" class="text-xs text-slate-400 bg-slate-100 px-2 py-0.5 rounded">
+                    <span v-if="link.is_disabled" class="text-xs text-slate-400 bg-slate-100 px-2 py-0.5 rounded">
                       Disabled
                     </span>
                   </div>
@@ -272,15 +272,15 @@
                     @click="toggleLinkStatus(link)"
                     :class="[
                       'inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold transition-all duration-200',
-                      link.status === 'active'
+                      !link.is_disabled
                         ? 'bg-green-50 text-green-700 hover:bg-green-100'
                         : 'bg-red-50 text-red-700 hover:bg-red-100'
                     ]"
-                    :title="link.status === 'active' ? 'Click to disable link' : 'Click to enable link'"
+                    :title="!link.is_disabled ? 'Click to disable link' : 'Click to enable link'"
                   >
-                    <span class="w-1.5 h-1.5 rounded-full" :class="link.status === 'active' ? 'bg-green-500' : 'bg-red-500'"></span>
-                    {{ link.status === 'active' ? 'Active' : 'Disabled' }}
-                    <i :class="link.status === 'active' ? 'ph ph-eye' : 'ph ph-eye-slash'" class="text-xs"></i>
+                    <span class="w-1.5 h-1.5 rounded-full" :class="!link.is_disabled ? 'bg-green-500' : 'bg-red-500'"></span>
+                    {{ !link.is_disabled ? 'Active' : 'Disabled' }}
+                    <i :class="!link.is_disabled ? 'ph ph-eye' : 'ph ph-eye-slash'" class="text-xs"></i>
                   </button>
                 </td>
                 <td class="px-6 py-4 text-right">
@@ -689,7 +689,7 @@ const links = ref([
     clicks: 4521,
     clickTrend: 12,
     date: '2024-11-28',
-    status: 'active'
+    is_disabled: false
   },
   {
     id: 2,
@@ -698,7 +698,7 @@ const links = ref([
     clicks: 2847,
     clickTrend: 8,
     date: '2024-11-25',
-    status: 'active'
+    is_disabled: false
   },
   {
     id: 3,
@@ -707,7 +707,7 @@ const links = ref([
     clicks: 1920,
     clickTrend: -5,
     date: '2024-11-20',
-    status: 'inactive'
+    is_disabled: true
   },
   {
     id: 4,
@@ -716,7 +716,7 @@ const links = ref([
     clicks: 1543,
     clickTrend: 15,
     date: '2024-11-18',
-    status: 'active'
+    is_disabled: false
   },
   {
     id: 5,
@@ -725,7 +725,7 @@ const links = ref([
     clicks: 1016,
     clickTrend: 0,
     date: '2024-11-15',
-    status: 'inactive'
+    is_disabled: true
   }
 ]);
 
@@ -745,7 +745,7 @@ const filteredLinks = computed(() => {
 
   // Status filter
   if (!showInactiveLinks.value) {
-    result = result.filter(link => link.status === 'active');
+    result = result.filter(link => !link.is_disabled);
   }
 
   // Search filter
@@ -1011,12 +1011,12 @@ const clearSelection = () => {
 };
 
 const toggleLinkStatus = (link) => {
-  // Toggle between 'active' and 'inactive'
-  link.status = link.status === 'active' ? 'inactive' : 'active';
+  // Toggle the is_disabled boolean field
+  link.is_disabled = !link.is_disabled;
 
   // In a real app, this would make an API call to update the status
   // For now, we'll just update the local state
-  console.log(`Link ${link.shortUrl} status changed to: ${link.status}`);
+  console.log(`Link ${link.shortUrl} is_disabled changed to: ${link.is_disabled}`);
 };
 
 const viewSelectedAnalytics = () => {

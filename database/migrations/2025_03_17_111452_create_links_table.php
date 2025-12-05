@@ -15,10 +15,11 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('user')->nullable(); // Changed to unsignedBigInteger for user ID
             $table->string('title')->nullable();
-            $table->string('description')->nullable(); 
+            $table->string('description')->nullable();
             $table->string('url');
             $table->string('slug')->unique();
-            
+            $table->boolean('is_disabled')->default(false);
+
             $table->timestamps();
             $table->softDeletes(); // Added softDeletes for deleted_at column
         });
