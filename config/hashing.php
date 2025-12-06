@@ -51,4 +51,23 @@ return [
         'verify' => true,
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Salt and Pepper Configuration
+    |--------------------------------------------------------------------------
+    |
+    | These settings are used by the PasswordEncryptionService for enhanced
+    | password security. The pepper should be set in your .env file as APP_PEPPER.
+    | Make sure to use a long, random string for the pepper value.
+    |
+    | WARNING: Never change the pepper once set in production, as it will
+    | invalidate all existing password hashes.
+    |
+    */
+
+    'salt_pepper' => [
+        'pepper_env_key' => 'APP_PEPPER',
+        'salt_length' => 32,
+    ],
+
 ];

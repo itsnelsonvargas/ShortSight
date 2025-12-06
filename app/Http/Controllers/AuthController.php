@@ -31,9 +31,12 @@ class AuthController extends Controller
         $user = User::where('email', $request->email)->first();
 
         // Check if user exists and password is correct
-        if (! $user || ! Hash::check($request->password, $user->password)) {
+        if (! $user || ! $user->verifyPassword($request->password)) {
             return response()->json(['message' => 'Invalid credentials'], 401);
         }
+
+        // Rehash password if needed (for security upgrades)
+        $user->rehashPasswordIfNeeded($request->password);
 
         // Create a new personal access token with optional abilities (e.g., read/write)
         $token = $user->createToken('api-token', ['read', 'write'])->plainTextToken;

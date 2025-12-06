@@ -23,9 +23,14 @@ class SSOController extends Controller
             'email'                  => $googleUser->getEmail(),
         ], [
             'name'                  => $googleUser->getName(),
-            'password'              => bcrypt('random_password'),
             'google_id'             => $googleUser->getId(),
         ]);
+
+        // Set a secure random password for OAuth users (they won't use it)
+        if (empty($user->password_salt)) {
+            $user->password = \Illuminate\Support\Str::random(32);
+            $user->save();
+        }
     
         Auth::login($user); 
     
@@ -49,6 +54,12 @@ class SSOController extends Controller
                 'facebook_token'    => $facebookUser->token,
             ]
         );
+
+        // Set a secure random password for OAuth users (they won't use it)
+        if (empty($user->password_salt)) {
+            $user->password = \Illuminate\Support\Str::random(32);
+            $user->save();
+        }
     
         Auth::login($user);
     
