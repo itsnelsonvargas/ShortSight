@@ -24,8 +24,8 @@
 
             <div v-if="!isAuthenticated" class="flex items-center gap-4">
               <button @click="showLoginModal = true" class="text-slate-700 font-semibold hover:text-indigo-600">Log in</button>
-              <button @click="showLoginModal = true" class="px-5 py-2.5 bg-slate-900 text-white rounded-xl font-medium hover:bg-slate-800 transition-all transform hover:-translate-y-0.5 hover:shadow-lg">
-                Get Started
+              <button @click="$router.push('/register')" class="px-5 py-2.5 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 transition-all transform hover:-translate-y-0.5 hover:shadow-lg">
+                Sign Up Free
               </button>
             </div>
             <div v-else class="flex items-center gap-4">
@@ -584,8 +584,8 @@
             <!-- Call to Action -->
             <div class="bg-slate-50 p-8 text-center border-t border-slate-200">
               <p class="text-slate-600 mb-4">Join thousands of creators who trust ShortSight for their link shortening needs.</p>
-              <button @click="showLoginModal = true" class="px-6 py-3 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 transition-colors">
-                Get Started Today
+              <button @click="$router.push('/register')" class="px-6 py-3 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 transition-colors">
+                Sign Up Free Today
               </button>
             </div>
           </div>
@@ -607,7 +607,7 @@
               <li class="flex items-center gap-2"><i class="ph ph-check text-green-500"></i> Basic Analytics</li>
               <li class="flex items-center gap-2"><i class="ph ph-check text-green-500"></i> Ad-supported</li>
             </ul>
-            <button class="w-full py-3 rounded-xl border-2 border-slate-900 text-slate-900 font-bold hover:bg-slate-50 transition-colors">Start Free</button>
+            <button @click="$router.push('/register')" class="w-full py-3 rounded-xl border-2 border-slate-900 text-slate-900 font-bold hover:bg-slate-50 transition-colors">Start Free</button>
           </div>
           <!-- Pro -->
           <div class="bg-indigo-600 p-8 rounded-3xl shadow-xl shadow-indigo-500/30 flex-1 text-white relative overflow-hidden">
@@ -619,7 +619,7 @@
               <li class="flex items-center gap-2"><i class="ph ph-check text-white"></i> No Ads</li>
               <li class="flex items-center gap-2"><i class="ph ph-check text-white"></i> API Access</li>
             </ul>
-            <button class="w-full py-3 rounded-xl bg-white text-indigo-600 font-bold hover:bg-indigo-50 transition-colors">Get Pro</button>
+            <button @click="$router.push('/register')" class="w-full py-3 rounded-xl bg-white text-indigo-600 font-bold hover:bg-indigo-50 transition-colors">Get Pro</button>
           </div>
         </div>
       </div>

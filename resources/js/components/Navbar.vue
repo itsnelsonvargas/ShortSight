@@ -33,7 +33,7 @@
                             to="/register"
                             class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
                         >
-                            Register
+                            Sign Up
                         </router-link>
                     </template>
                     <template v-else>
@@ -69,6 +69,14 @@
                 <a href="#contact" class="block py-2 text-gray-700 hover:text-blue-600">
                     Contact
                 </a>
+                <template v-if="!isAuthenticated">
+                    <router-link to="/login" class="block py-2 text-gray-700 hover:text-blue-600">
+                        Login
+                    </router-link>
+                    <router-link to="/register" class="block py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-center mt-2">
+                        Sign Up
+                    </router-link>
+                </template>
             </div>
         </div>
     </nav>
