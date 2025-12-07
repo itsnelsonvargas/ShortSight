@@ -17,24 +17,31 @@ class SSOController extends Controller
 
     public function storeGoogle()
     {
-        $googleUser = Socialite::driver('google')->stateless()->user();  
+        try {
+            $googleUser = Socialite::driver('google')->user();
 
-        $user = User::updateOrCreate([
-            'email'                  => $googleUser->getEmail(),
-        ], [
-            'name'                  => $googleUser->getName(),
-            'google_id'             => $googleUser->getId(),
-        ]);
+            $user = User::updateOrCreate([
+                'email' => $googleUser->getEmail(),
+            ], [
+                'name' => $googleUser->getName(),
+                'google_id' => $googleUser->getId(),
+            ]);
 
-        // Set a secure random password for OAuth users (they won't use it)
-        if (empty($user->password_salt)) {
-            $user->password = \Illuminate\Support\Str::random(32);
-            $user->save();
+            // Set a secure random password for OAuth users (they won't use it)
+            if (empty($user->password)) {
+                // Bypass the custom password setter for OAuth users
+                $user->attributes['password'] = bcrypt(\Illuminate\Support\Str::random(32));
+                $user->attributes['password_salt'] = null;
+                $user->save();
+            }
+
+            Auth::login($user);
+
+            return redirect('/dashboard');
+        } catch (\Exception $e) {
+            \Log::error('Google SSO Error: ' . $e->getMessage());
+            return redirect('/login')->with('error', 'Google authentication failed. Please try again.');
         }
-    
-        Auth::login($user); 
-    
-        return view('welcome');
     }
 
     public function indexFacebook()
@@ -44,26 +51,32 @@ class SSOController extends Controller
 
     public function storeFacebook()
     {
-        $facebookUser = Socialite::driver('facebook')->stateless()->user();
+        try {
+            $facebookUser = Socialite::driver('facebook')->user();
 
-        $user = User::updateOrCreate(
-            ['facebook_id'          => $facebookUser->getId()],
-            [
-                'name'              => $facebookUser->getName(),
-                'email'             => $facebookUser->getEmail(),
-                'facebook_token'    => $facebookUser->token,
-            ]
-        );
+            $user = User::updateOrCreate([
+                'email' => $facebookUser->getEmail(),
+            ], [
+                'name' => $facebookUser->getName(),
+                'facebook_id' => $facebookUser->getId(),
+                'facebook_token' => $facebookUser->token,
+            ]);
 
-        // Set a secure random password for OAuth users (they won't use it)
-        if (empty($user->password_salt)) {
-            $user->password = \Illuminate\Support\Str::random(32);
-            $user->save();
+            // Set a secure random password for OAuth users (they won't use it)
+            if (empty($user->password)) {
+                // Bypass the custom password setter for OAuth users
+                $user->attributes['password'] = bcrypt(\Illuminate\Support\Str::random(32));
+                $user->attributes['password_salt'] = null;
+                $user->save();
+            }
+
+            Auth::login($user);
+
+            return redirect('/dashboard');
+        } catch (\Exception $e) {
+            \Log::error('Facebook SSO Error: ' . $e->getMessage());
+            return redirect('/login')->with('error', 'Facebook authentication failed. Please try again.');
         }
-    
-        Auth::login($user);
-    
-        return redirect('/dashboard');  
     }
 
 }
