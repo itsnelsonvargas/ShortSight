@@ -28,9 +28,14 @@ Route::middleware('auth:sanctum')->post('/logout', [AuthController::class, 'logo
 /*
  * Get authenticated user
  */
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+Route::middleware(['auth:sanctum', 'verified'])->get('/user', function (Request $request) {
     return $request->user();
 });
+
+/*
+ * Account Management Routes
+ */
+Route::middleware(['auth:sanctum', 'verified'])->delete('/user/account', [UserController::class, 'destroy']);
 
 /*
  * Link Management Routes

@@ -42,10 +42,34 @@ Route::get('/auth/facebook', [SSOController::class, 'indexFacebook'])
 Route::get('/auth/facebook/callback', [SSOController::class,'storeFacebook'])
     ->name('facebook.callback');
 
+// Email Verification Routes
+Route::get('/email/verify', function () {
+    return view('app'); // Let Vue handle the email verification UI
+})->middleware('auth')->name('verification.notice');
+
+Route::get('/email/verify/{id}/{hash}', function (Illuminate\Foundation\Auth\EmailVerificationRequest $request) {
+    $request->fulfill();
+    return redirect('/dashboard?verified=1');
+})->middleware(['auth', 'signed'])->name('verification.verify');
+
+Route::post('/email/verification-notification', function (Illuminate\Http\Request $request) {
+    $request->user()->sendEmailVerificationNotification();
+    return back()->with('resent', true);
+})->middleware(['auth', 'throttle:6,1'])->name('verification.send');
+
 // Short URL redirect - must be first with specific constraints
 Route::get('/{slug}',  [LinkController::class, 'show'])
     ->where('slug', '[A-Za-z0-9\-]{3,}')
     ->where('slug', '^(?!dashboard|login|register|auth|api).*$');
+
+// Static pages
+Route::get('/privacy-policy', function () {
+    return view('privacy-policy');
+})->name('privacy-policy');
+
+Route::get('/terms-of-service', function () {
+    return view('terms-of-service');
+})->name('terms-of-service');
 
 // Catch all route for Vue SPA - must be last
 Route::get('/{any}', function () {
