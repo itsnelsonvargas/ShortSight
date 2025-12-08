@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
+use App\Services\DataExportService;
 
 class UserController extends Controller
 {
@@ -36,17 +37,13 @@ class UserController extends Controller
                 'password' => $request->password, // This will use the custom password setter
             ]);
 
-            // Send email verification notification
-            $user->sendEmailVerificationNotification();
-
             return response()->json([
-                'message' => 'User registered successfully. Please check your email to verify your account.',
+                'message' => 'User registered successfully',
                 'user' => [
                     'id' => $user->id,
                     'name' => $user->name,
                     'email' => $user->email,
-                ],
-                'requires_verification' => true
+                ]
             ], 201);
 
         } catch (\Exception $e) {
@@ -58,50 +55,67 @@ class UserController extends Controller
     }
 
     /**
-     * Delete user account (GDPR right to erasure)
+     * Export user data for GDPR compliance (Data Portability)
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\Response
      */
-    public function destroy(Request $request)
+    public function exportData(Request $request)
     {
         $user = $request->user();
 
-        // Validate current password for security
-        $request->validate([
-            'password' => 'required|string',
-        ]);
-
-        // Verify password
-        if (!$user->verifyPassword($request->password)) {
+        if (!$user) {
             return response()->json([
-                'message' => 'Invalid password. Account deletion cancelled.'
-            ], 403);
+                'message' => 'Authentication required'
+            ], 401);
         }
 
         try {
-            // Get all slugs for user's links before deleting them
-            $userSlugs = $user->links()->pluck('slug')->toArray();
-
-            // Delete all user's links
-            $user->links()->delete();
-
-            // Delete all visitor analytics for user's links
-            // Note: This might be a lot of data, consider soft deletes or batch processing
-            if (!empty($userSlugs)) {
-                \App\Models\Visitor::whereIn('slug', $userSlugs)->delete();
-            }
-
-            // Delete the user account
-            $user->delete();
-
-            return response()->json([
-                'message' => 'Your account and all associated data have been permanently deleted.'
-            ], 200);
+            $exportService = app(DataExportService::class);
+            return $exportService->generateDownloadResponse($user);
 
         } catch (\Exception $e) {
             return response()->json([
-                'message' => 'Account deletion failed. Please contact support.',
+                'message' => 'Data export failed',
                 'error' => $e->getMessage()
             ], 500);
         }
     }
 
+    /**
+     * Get data export information without downloading (preview)
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getDataExportInfo(Request $request)
+    {
+        $user = $request->user();
+
+        if (!$user) {
+            return response()->json([
+                'message' => 'Authentication required'
+            ], 401);
+        }
+
+        try {
+            $exportService = app(DataExportService::class);
+            $data = $exportService->exportUserData($user);
+
+            // Return summary instead of full data for preview
+            return response()->json([
+                'message' => 'Data export information retrieved successfully',
+                'data_summary' => $data['data_summary'],
+                'export_metadata' => $data['export_metadata'],
+                'download_available' => true,
+                'gdpr_compliant' => true,
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Failed to retrieve data export information',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }

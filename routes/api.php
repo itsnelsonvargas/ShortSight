@@ -28,14 +28,15 @@ Route::middleware('auth:sanctum')->post('/logout', [AuthController::class, 'logo
 /*
  * Get authenticated user
  */
-Route::middleware(['auth:sanctum', 'verified'])->get('/user', function (Request $request) {
+Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
 /*
- * Account Management Routes
+ * GDPR Data Portability Routes
  */
-Route::middleware(['auth:sanctum', 'verified'])->delete('/user/account', [UserController::class, 'destroy']);
+Route::middleware('auth:sanctum')->get('/user/data-export', [UserController::class, 'getDataExportInfo']);
+Route::middleware('auth:sanctum')->get('/user/data-export/download', [UserController::class, 'exportData']);
 
 /*
  * Link Management Routes

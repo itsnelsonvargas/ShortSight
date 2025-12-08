@@ -11,6 +11,11 @@ class Visitor extends Model
 
     protected $table = 'visitors';
 
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
     protected $fillable = [
         'slug',
         'ip_address',
@@ -29,6 +34,11 @@ class Visitor extends Model
         'vpn',
     ];
 
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
     protected $casts = [
         'latitude' => 'float',
         'longitude' => 'float',
@@ -36,7 +46,7 @@ class Visitor extends Model
     ];
 
     /**
-     * Get the link that this visitor accessed
+     * Get the link that this visitor accessed.
      */
     public function link()
     {
