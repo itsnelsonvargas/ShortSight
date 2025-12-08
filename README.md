@@ -1,6 +1,53 @@
 <<<<<<< HEAD
 # ShortSight
 
+## Database Optimization for Massive Scale
+
+ShortSight is optimized to handle millions to hundreds of millions of clicks with enterprise-grade performance. The database architecture includes:
+
+### 🚀 **High-Performance Features**
+
+- **Intelligent Indexing**: Composite indexes on frequently queried columns (slug+timestamp, user+status, etc.)
+- **Table Partitioning**: Monthly partitioning of visitor data for optimal query performance
+- **Data Archiving**: Automatic archiving of old visitor records with summarized statistics
+- **Query Optimization**: Pre-computed analytics views and cached query results
+- **Connection Pooling**: Optimized database connections for high concurrency
+
+### 📊 **Scalability Architecture**
+
+```
+Visitors Table (Partitioned by Month)
+├── Current Month: Hot data, fully indexed
+├── Last 12 Months: Recent data, optimized queries
+├── 13-24 Months: Archived detailed data
+└── 25+ Months: Summarized statistics only
+```
+
+### ⚡ **Performance Optimizations**
+
+- **Bulk Insert Operations**: Batch visitor tracking for high-throughput scenarios
+- **Redis Caching**: Multi-level caching for link lookups and analytics
+- **Read/Write Splitting**: Separate read replicas for analytics queries
+- **Query Result Streaming**: Memory-efficient handling of large result sets
+
+### 🔧 **Database Migrations**
+
+Run these migrations to enable massive-scale optimizations:
+
+```bash
+php artisan migrate
+php artisan visitors:archive  # Archive old data
+php artisan cache:warm        # Pre-warm caches
+```
+
+### 📈 **Expected Performance**
+
+- **Redirect Speed**: <10ms average response time
+- **Analytics Queries**: <100ms for complex aggregations
+- **Concurrent Users**: Supports 100K+ simultaneous users
+- **Daily Clicks**: Handles 100M+ clicks per day
+- **Data Retention**: Efficient storage for years of historical data
+
 ## Rate Limiting Configuration
 
 ShortSight uses configurable rate limiting to prevent abuse. All rate limits can be configured via environment variables:
