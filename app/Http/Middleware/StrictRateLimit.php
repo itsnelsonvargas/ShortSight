@@ -23,21 +23,25 @@ class StrictRateLimit
      * Handle an incoming request.
      *
      * Very strict rate limiting for authentication endpoints.
-     * 5 attempts per minute per IP, 20 per hour.
+     * Configurable limits via environment variables.
      */
-    public function handle(Request $request, Closure $next, string $maxAttempts = '5', string $decayMinutes = '1'): Response
+    public function handle(Request $request, Closure $next, string $maxAttempts = null, string $decayMinutes = '1'): Response
     {
         $key = $this->resolveRequestSignature($request);
 
+        // Use environment variables if not explicitly passed
+        $minuteLimit = $maxAttempts ?: (string) env('STRICT_LIMIT_MINUTE', 5);
+        $hourlyLimit = (int) env('STRICT_LIMIT_HOUR', 20);
+
         // Check minute-based limit
-        if ($this->limiter->tooManyAttempts($key, $maxAttempts)) {
-            return $this->buildResponse($key, $maxAttempts, $decayMinutes);
+        if ($this->limiter->tooManyAttempts($key, $minuteLimit)) {
+            return $this->buildResponse($key, $minuteLimit, $decayMinutes);
         }
 
-        // Check hour-based limit (20 attempts per hour)
+        // Check hour-based limit
         $hourlyKey = $key . ':hourly';
-        if ($this->limiter->tooManyAttempts($hourlyKey, 20)) {
-            return $this->buildHourlyResponse($hourlyKey);
+        if ($this->limiter->tooManyAttempts($hourlyKey, $hourlyLimit)) {
+            return $this->buildHourlyResponse($hourlyKey, $hourlyLimit);
         }
 
         $this->limiter->hit($key, $decayMinutes * 60);
@@ -47,8 +51,8 @@ class StrictRateLimit
 
         return $this->addHeaders(
             $response,
-            $maxAttempts,
-            $this->calculateRemainingAttempts($key, $maxAttempts),
+            $minuteLimit,
+            $this->calculateRemainingAttempts($key, $minuteLimit),
             $this->limiter->availableIn($key)
         );
     }
@@ -88,19 +92,19 @@ class StrictRateLimit
     /**
      * Create a rate limit exceeded response for hourly limit.
      */
-    protected function buildHourlyResponse(string $key): Response
+    protected function buildHourlyResponse(string $key, int $limit): Response
     {
         $response = response()->json([
             'message' => 'Too many requests. Hourly limit exceeded.',
             'error' => 'hourly_rate_limit_exceeded',
             'retry_after' => $this->limiter->availableIn($key),
-            'limit' => '20 per hour',
+            'limit' => $limit . ' per hour',
         ], 429);
 
         return $this->addHeaders(
             $response,
-            20,
-            $this->calculateRemainingAttempts($key, 20),
+            $limit,
+            $this->calculateRemainingAttempts($key, $limit),
             $this->limiter->availableIn($key)
         );
     }

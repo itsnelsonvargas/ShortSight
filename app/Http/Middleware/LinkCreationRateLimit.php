@@ -23,28 +23,32 @@ class LinkCreationRateLimit
      * Handle an incoming request.
      *
      * Rate limiting specifically for link creation to prevent spam.
-     * 10 links per minute per IP, 50 per hour, 200 per day.
+     * Configurable limits via environment variables.
      */
     public function handle(Request $request, Closure $next): Response
     {
         $key = $this->resolveRequestSignature($request);
 
-        // Check minute-based limit (10 links per minute)
+        $minuteLimit = (int) env('LINK_CREATION_LIMIT_MINUTE', 10);
+        $hourlyLimit = (int) env('LINK_CREATION_LIMIT_HOUR', 50);
+        $dailyLimit = (int) env('LINK_CREATION_LIMIT_DAY', 200);
+
+        // Check minute-based limit
         $minuteKey = $key . ':minute';
-        if ($this->limiter->tooManyAttempts($minuteKey, 10)) {
-            return $this->buildMinuteResponse($minuteKey);
+        if ($this->limiter->tooManyAttempts($minuteKey, $minuteLimit)) {
+            return $this->buildMinuteResponse($minuteKey, $minuteLimit);
         }
 
-        // Check hour-based limit (50 links per hour)
+        // Check hour-based limit
         $hourlyKey = $key . ':hourly';
-        if ($this->limiter->tooManyAttempts($hourlyKey, 50)) {
-            return $this->buildHourlyResponse($hourlyKey);
+        if ($this->limiter->tooManyAttempts($hourlyKey, $hourlyLimit)) {
+            return $this->buildHourlyResponse($hourlyKey, $hourlyLimit);
         }
 
-        // Check daily-based limit (200 links per day)
+        // Check daily-based limit
         $dailyKey = $key . ':daily';
-        if ($this->limiter->tooManyAttempts($dailyKey, 200)) {
-            return $this->buildDailyResponse($dailyKey);
+        if ($this->limiter->tooManyAttempts($dailyKey, $dailyLimit)) {
+            return $this->buildDailyResponse($dailyKey, $dailyLimit);
         }
 
         $this->limiter->hit($minuteKey, 60);      // 1 minute
@@ -55,8 +59,8 @@ class LinkCreationRateLimit
 
         return $this->addHeaders(
             $response,
-            10, // minute limit
-            $this->calculateRemainingAttempts($minuteKey, 10),
+            $minuteLimit,
+            $this->calculateRemainingAttempts($minuteKey, $minuteLimit),
             $this->limiter->availableIn($minuteKey)
         );
     }
@@ -74,19 +78,19 @@ class LinkCreationRateLimit
     /**
      * Create a rate limit exceeded response for minute limit.
      */
-    protected function buildMinuteResponse(string $key): Response
+    protected function buildMinuteResponse(string $key, int $limit): Response
     {
         $response = response()->json([
             'message' => 'Too many links created. Please wait before creating more links.',
             'error' => 'link_creation_rate_limit_exceeded',
             'retry_after' => $this->limiter->availableIn($key),
-            'limit' => '10 links per minute',
+            'limit' => $limit . ' links per minute',
         ], 429);
 
         return $this->addHeaders(
             $response,
-            10,
-            $this->calculateRemainingAttempts($key, 10),
+            $limit,
+            $this->calculateRemainingAttempts($key, $limit),
             $this->limiter->availableIn($key)
         );
     }
@@ -94,19 +98,19 @@ class LinkCreationRateLimit
     /**
      * Create a rate limit exceeded response for hourly limit.
      */
-    protected function buildHourlyResponse(string $key): Response
+    protected function buildHourlyResponse(string $key, int $limit): Response
     {
         $response = response()->json([
             'message' => 'Hourly link creation limit exceeded.',
             'error' => 'link_creation_hourly_limit_exceeded',
             'retry_after' => $this->limiter->availableIn($key),
-            'limit' => '50 links per hour',
+            'limit' => $limit . ' links per hour',
         ], 429);
 
         return $this->addHeaders(
             $response,
-            50,
-            $this->calculateRemainingAttempts($key, 50),
+            $limit,
+            $this->calculateRemainingAttempts($key, $limit),
             $this->limiter->availableIn($key)
         );
     }
@@ -114,19 +118,19 @@ class LinkCreationRateLimit
     /**
      * Create a rate limit exceeded response for daily limit.
      */
-    protected function buildDailyResponse(string $key): Response
+    protected function buildDailyResponse(string $key, int $limit): Response
     {
         $response = response()->json([
             'message' => 'Daily link creation limit exceeded. Please try again tomorrow.',
             'error' => 'link_creation_daily_limit_exceeded',
             'retry_after' => $this->limiter->availableIn($key),
-            'limit' => '200 links per day',
+            'limit' => $limit . ' links per day',
         ], 429);
 
         return $this->addHeaders(
             $response,
-            200,
-            $this->calculateRemainingAttempts($key, 200),
+            $limit,
+            $this->calculateRemainingAttempts($key, $limit),
             $this->limiter->availableIn($key)
         );
     }

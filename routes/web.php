@@ -29,7 +29,7 @@ Route::get('/', function () {
 
 // SSO Routes
 Route::get('/auth/google',  [SSOController::class,'indexGoogle'])
-    ->middleware('strict.throttle:3,5') // 3 attempts per 5 minutes for SSO
+    ->middleware('strict.throttle:' . env('SSO_LIMIT_ATTEMPTS', 3) . ',' . env('SSO_LIMIT_MINUTES', 5))
     ->name('google.login');
 
 Route::get('/auth/google/callback', [SSOController::class, 'storeGoogle'])

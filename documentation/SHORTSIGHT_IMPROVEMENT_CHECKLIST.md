@@ -58,7 +58,7 @@ This document provides a comprehensive evaluation and prioritized improvement ch
 
 - **Add rate limiting** - **100% Complete** ✅
   - *Why it matters*: Prevents abuse and ensures service reliability
-  - *Implementation*: Custom rate limiting middleware with different tiers (auth: 5/min, links: 10/min+50/hr+200/day, API: 100/min+1000/hr)
+  - *Implementation*: Environment-configurable rate limiting middleware with different tiers (configurable via .env variables)
   - *Competitive reference*: All major services implement comprehensive rate limiting
 
 - **Database optimization** - **5% Complete**

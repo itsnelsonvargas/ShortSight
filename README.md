@@ -1,5 +1,46 @@
 <<<<<<< HEAD
 # ShortSight
+
+## Rate Limiting Configuration
+
+ShortSight uses configurable rate limiting to prevent abuse. All rate limits can be configured via environment variables:
+
+### Environment Variables
+
+```bash
+# Link Creation Rate Limits (per IP)
+LINK_CREATION_LIMIT_MINUTE=10    # Links per minute
+LINK_CREATION_LIMIT_HOUR=50      # Links per hour
+LINK_CREATION_LIMIT_DAY=200      # Links per day
+
+# API Rate Limits (per user/IP)
+API_LIMIT_MINUTE=100             # API calls per minute
+API_LIMIT_HOUR=1000              # API calls per hour
+
+# Strict Rate Limits (for authentication)
+STRICT_LIMIT_MINUTE=5            # Auth attempts per minute
+STRICT_LIMIT_HOUR=20             # Auth attempts per hour
+
+# SSO Rate Limits
+SSO_LIMIT_ATTEMPTS=3             # SSO attempts allowed
+SSO_LIMIT_MINUTES=5              # Time window for SSO limits
+
+# Default API Rate Limit (Laravel default)
+API_DEFAULT_LIMIT_MINUTE=60      # Default API rate limit
+```
+
+### Default Values
+
+If environment variables are not set, the following defaults are used:
+- Link creation: 10/minute, 50/hour, 200/day
+- API calls: 100/minute, 1000/hour
+- Authentication: 5/minute, 20/hour
+- SSO: 3 attempts per 5 minutes
+- Default API: 60/minute
+
+### Usage
+
+Add these variables to your `.env` file to customize rate limiting behavior for your deployment needs.
 URL shortener with visitor tracker
 =======
 <p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
