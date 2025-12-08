@@ -21,8 +21,10 @@ use App\Http\Controllers\UserController;
 /*
  * Authentication Routes
  */
-Route::post('/login', [AuthController::class, 'login']);
-Route::post('/register', [UserController::class, 'store']);
+Route::middleware('strict.throttle')->group(function () {
+    Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/register', [UserController::class, 'store']);
+});
 Route::middleware('auth:sanctum')->post('/logout', [AuthController::class, 'logout']);
 
 /*
@@ -35,41 +37,45 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 /*
  * GDPR Data Portability Routes
  */
-Route::middleware('auth:sanctum')->get('/user/data-export', [UserController::class, 'getDataExportInfo']);
-Route::middleware('auth:sanctum')->get('/user/data-export/download', [UserController::class, 'exportData']);
+Route::middleware(['auth:sanctum', 'api.throttle'])->group(function () {
+    Route::get('/user/data-export', [UserController::class, 'getDataExportInfo']);
+    Route::get('/user/data-export/download', [UserController::class, 'exportData']);
+});
 
 /*
  * Link Management Routes
  */
-Route::post('/links', [LinkController::class, 'storeWithoutUserAccount']);
-Route::get('/check-slug', [LinkController::class, 'checkSlug']);
+Route::middleware('link.creation.throttle')->post('/links', [LinkController::class, 'storeWithoutUserAccount']);
+Route::middleware('api.throttle')->get('/check-slug', [LinkController::class, 'checkSlug']);
 
 /*********************************
 *                                *
 * v1 API Routes                  *
 *                                *
 *********************************/
-Route::get('/v1/ping', function () {
-    return response()->json([
-        'status'  => 'success',
-        'message' => 'pong',
-    ]);
+Route::middleware('api.throttle')->group(function () {
+    Route::get('/v1/ping', function () {
+        return response()->json([
+            'status'  => 'success',
+            'message' => 'pong',
+        ]);
+    });
+
+    Route::post('/v1/create-token', [ApiController::class, 'createToken'])
+                ->name('api.createToken');
+
+    Route::get('/v1/delete-token', [ApiController::class, 'deleteToken'])
+                ->name('api.deleteToken');
+
+    Route::get('/v1/link/{url}', [ApiController::class, 'getStoredLink'])
+                ->name('api.getLink');
+
+    Route::get('/v1/check-slug', [ApiController::class, 'isSlugAvailable'])
+                ->name('api.checkSlug');
+
+    Route::get('/v1/get-slug/{link}', [ApiController::class, 'getSlugOfLink'])
+                ->name('api.getSlugOfLink');
+
+    Route::get('/v1/check-url/{url}', [ApiController::class, 'isUrlSafe'])
+                ->name('api.checkUrl');
 });
-
-Route::post('/v1/create-token', [ApiController::class, 'createToken'])
-            ->name('api.createToken');
-
-Route::get('/v1/delete-token', [ApiController::class, 'deleteToken'])
-            ->name('api.deleteToken');
-
-Route::get('/v1/link/{url}', [ApiController::class, 'getStoredLink'])
-            ->name('api.getLink');
-
-Route::get('/v1/check-slug', [ApiController::class, 'isSlugAvailable'])
-            ->name('api.checkSlug');
-
-Route::get('/v1/get-slug/{link}', [ApiController::class, 'getSlugOfLink'])
-            ->name('api.getSlugOfLink');
-
-Route::get('/v1/check-url/{url}', [ApiController::class, 'isUrlSafe'])
-            ->name('api.checkUrl');

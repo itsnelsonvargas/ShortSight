@@ -64,5 +64,9 @@ class Kernel extends HttpKernel
         'signed' => \App\Http\Middleware\ValidateSignature::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
+        // Custom rate limiting middleware
+        'strict.throttle' => \App\Http\Middleware\StrictRateLimit::class,
+        'api.throttle' => \App\Http\Middleware\ApiRateLimit::class,
+        'link.creation.throttle' => \App\Http\Middleware\LinkCreationRateLimit::class,
     ];
 }
