@@ -4,8 +4,11 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Link;
+use App\Models\Visitor;
 use Illuminate\Support\Str;
-use App\Services\UrlSafetyService; 
+use App\Services\UrlSafetyService;
+use App\Services\RedisCacheService;
+use App\Helpers\AnalyticsHelper; 
 
 
 class LinkController extends Controller
@@ -67,10 +70,25 @@ class LinkController extends Controller
         /****************************************************************
         *                                                               *
         * Check if the URL is malicious using Google Safe Browsing API  *
-        *                                                               *        
+        *                                                               *
         ****************************************************************/
 
-        if(  (new UrlSafetyService())->isMalicious($request->url) ) {
+        $cacheService = app(RedisCacheService::class);
+
+        // Check cached URL safety first
+        $isSafe = $cacheService->getCachedUrlSafety($request->url);
+
+        if ($isSafe === null) {
+            // Not in cache, check with service
+            $urlSafetyService = new UrlSafetyService();
+            $isMalicious = $urlSafetyService->isMalicious($request->url);
+
+            // Cache the result
+            $cacheService->cacheUrlSafety($request->url, !$isMalicious);
+            $isSafe = !$isMalicious;
+        }
+
+        if (!$isSafe) {
             return back()->withErrors(['url' => 'The URL is malicious.']);
         }
 
@@ -115,14 +133,69 @@ class LinkController extends Controller
     public function show($slug)
     {
         try {
-            //Look for the slug in the database
-            $link = Link::where('slug', $slug)->firstOrFail();
+            $cacheService = app(RedisCacheService::class);
 
-            //redirect to the URL based on the slug  (Can be viewed in the database)
+            // Try to get link from cache first
+            $link = $cacheService->getCachedSlugLookup($slug);
+
+            if (!$link) {
+                // If not in cache, get from database
+                $link = Link::where('slug', $slug)->firstOrFail();
+
+                // Cache the result for future requests
+                $cacheService->cacheSlugLookup($slug, $link);
+                $cacheService->cacheLinkMetadata($link);
+            }
+
+            // Track visitor analytics asynchronously
+            $this->trackVisitorAnalytics($slug, request());
+
+            // Increment click count in cache
+            $cacheService->incrementClickCount($slug);
+
+            //redirect to the URL based on the slug
             return redirect($link->url);
         } catch (\Exception $e) {
             //if no link is found, it will throw a 404 error
             return abort(404);
+        }
+    }
+
+    /**
+     * Track visitor analytics for link clicks
+     *
+     * @param string $slug
+     * @param Request $request
+     * @return void
+     */
+    private function trackVisitorAnalytics(string $slug, Request $request): void
+    {
+        try {
+            // Get visitor information
+            $visitorInfo = getVisitorInfo($request);
+
+            // Create visitor record asynchronously to avoid slowing down redirects
+            Visitor::create([
+                'slug' => $slug,
+                'ip_address' => $visitorInfo['ip_address'],
+                'user_agent' => $visitorInfo['user_agent'],
+                'browser' => $visitorInfo['browser'],
+                'device' => $visitorInfo['device'],
+                'platform' => $visitorInfo['platform'],
+                'referer' => $visitorInfo['referer'],
+                'country' => $visitorInfo['location']['country'],
+                'city' => $visitorInfo['location']['city'],
+                'region' => $visitorInfo['location']['region'],
+                'postal_code' => $visitorInfo['location']['postal_code'],
+                'latitude' => $visitorInfo['location']['latitude'],
+                'longitude' => $visitorInfo['location']['longitude'],
+            ]);
+        } catch (\Exception $e) {
+            // Log analytics error but don't fail the redirect
+            \Log::error('Failed to track visitor analytics', [
+                'slug' => $slug,
+                'error' => $e->getMessage()
+            ]);
         }
     }
 

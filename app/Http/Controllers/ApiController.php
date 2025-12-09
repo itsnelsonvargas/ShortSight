@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request; 
+use Illuminate\Http\Request;
 use App\Models\Link;
-use App\Services\UrlSafetyService;  
+use App\Services\UrlSafetyService;
+use App\Services\RedisCacheService;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 
@@ -76,16 +77,25 @@ class ApiController extends Controller
      **********************************************/
     public function getStoredLink($slug)
     {
+        $cacheService = app(RedisCacheService::class);
 
-        // Find the link by slug
-        $link = Link::where('slug', $slug)->first();
+        // Try to get link from cache first
+        $link = $cacheService->getCachedSlugLookup($slug);
 
         if (!$link) {
-            return response()->json(['error' => 'Link not found'], 404);
+            // If not in cache, get from database
+            $link = Link::where('slug', $slug)->first();
+
+            if (!$link) {
+                return response()->json(['error' => 'Link not found'], 404);
+            }
+
+            // Cache the result
+            $cacheService->cacheSlugLookup($slug, $link);
         }
 
         $data = [
-            'link'   => $link->url,
+            'link' => $link->url,
         ];
 
         // Return the link details
@@ -101,10 +111,22 @@ class ApiController extends Controller
      **********************************************/
     public function isSlugAvailable($slug)
     {
-        // Check if the slug is available
+        $cacheService = app(RedisCacheService::class);
+
+        // Check cache first
+        $cachedLink = $cacheService->getCachedSlugLookup($slug);
+
+        if ($cachedLink !== null) {
+            // Link exists in cache
+            return response()->json(['available' => false]);
+        }
+
+        // Check database if not in cache
         $link = Link::where('slug', $slug)->first();
 
         if ($link) {
+            // Cache the result for future requests
+            $cacheService->cacheSlugLookup($slug, $link);
             return response()->json(['available' => false]);
         }
 
@@ -167,13 +189,22 @@ class ApiController extends Controller
         ]);
 
         $link = $request->input('link');
+        $cacheService = app(RedisCacheService::class);
 
-        // Check if the link is safe
- 
-        if(  (new UrlSafetyService())->isMalicious($link) ) {
-            return response()->json(['safe' => false]);
+        // Check cached result first
+        $isSafe = $cacheService->getCachedUrlSafety($link);
+
+        if ($isSafe === null) {
+            // Not in cache, check with service
+            $urlSafetyService = new UrlSafetyService();
+            $isMalicious = $urlSafetyService->isMalicious($link);
+
+            // Cache the result
+            $cacheService->cacheUrlSafety($link, !$isMalicious);
+            $isSafe = !$isMalicious;
         }
-        return response()->json(['safe' => true]);
+
+        return response()->json(['safe' => $isSafe]);
     }
 
 

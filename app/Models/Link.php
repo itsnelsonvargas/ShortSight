@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Services\RedisCacheService;
 
 class Link extends Model
 {
@@ -57,5 +58,38 @@ class Link extends Model
     public function getClickCountAttribute()
     {
         return $this->visitors()->count();
+    }
+
+    /**
+     * Boot the model and add event listeners for cache invalidation
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        // Invalidate cache when link is updated
+        static::updated(function ($link) {
+            $cacheService = app(RedisCacheService::class);
+            $cacheService->invalidateSlugCache($link->slug);
+
+            // If URL changed, also invalidate URL safety cache
+            if ($link->wasChanged('url')) {
+                $cacheService->invalidateUrlSafetyCache($link->getOriginal('url'));
+            }
+        });
+
+        // Invalidate cache when link is deleted
+        static::deleted(function ($link) {
+            $cacheService = app(RedisCacheService::class);
+            $cacheService->invalidateSlugCache($link->slug);
+            $cacheService->invalidateUrlSafetyCache($link->url);
+        });
+
+        // Cache link metadata when created
+        static::created(function ($link) {
+            $cacheService = app(RedisCacheService::class);
+            $cacheService->cacheSlugLookup($link->slug, $link);
+            $cacheService->cacheLinkMetadata($link);
+        });
     }
 }
