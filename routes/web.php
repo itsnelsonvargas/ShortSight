@@ -46,6 +46,32 @@ Route::get('/{slug}',  [LinkController::class, 'show'])
     ->where('slug', '[A-Za-z0-9\-]{3,}')
     ->where('slug', '^(?!dashboard|login|register|auth|api).*$');
 
+// Dynamic web manifest for PWA
+Route::get('/site.webmanifest', function () {
+    $siteName = config('app.site_name', 'ShortSight');
+    $manifest = [
+        "name" => $siteName . " - Advanced URL Shortener",
+        "short_name" => $siteName,
+        "description" => "Free URL shortener with advanced analytics, custom domains, and QR code generation",
+        "start_url" => "/",
+        "display" => "standalone",
+        "background_color" => "#ffffff",
+        "theme_color" => "#2563eb",
+        "orientation" => "portrait-primary",
+        "categories" => ["productivity", "utilities"],
+        "lang" => "en-US",
+        "icons" => [
+            [
+                "src" => "/favicon.ico",
+                "sizes" => "any",
+                "type" => "image/x-icon"
+            ]
+        ]
+    ];
+
+    return response()->json($manifest);
+});
+
 // Catch all route for Vue SPA - must be last
 Route::get('/{any}', function () {
     return view('app');

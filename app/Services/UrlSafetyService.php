@@ -5,6 +5,10 @@ namespace App\Services;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
+use App\Models\DomainBlacklist;
+use App\Models\MaliciousPattern;
+use App\Models\ContentTypeRestriction;
+use App\Models\UrlValidationLog;
 
 class UrlSafetyService
 {
@@ -83,6 +87,17 @@ class UrlSafetyService
             $results['errors'][] = 'URL flagged by Google Safe Browsing';
         }
 
+        // Log validation result for analytics
+        try {
+            UrlValidationLog::logValidation($url, $results, request()->ip());
+        } catch (\Exception $e) {
+            // Don't fail validation if logging fails
+            Log::debug('URL validation logging failed', [
+                'url' => $url,
+                'error' => $e->getMessage()
+            ]);
+        }
+
         return $results;
     }
 
@@ -93,7 +108,7 @@ class UrlSafetyService
     {
         $response = Http::post("https://safebrowsing.googleapis.com/v4/threatMatches:find?key={$this->apiKey}", [
             'client' => [
-                'clientId'          => 'shortsight-url-shortener',
+                'clientId'          => strtolower(config('app.site_name', 'shortsight')) . '-url-shortener',
                 'clientVersion'     => '1.0',
             ],
             'threatInfo' => [
@@ -133,6 +148,20 @@ class UrlSafetyService
         // Remove www. prefix for comparison
         $domain = preg_replace('/^www\./', '', $domain);
 
+        // Check database first (dynamic blacklist)
+        try {
+            if (DomainBlacklist::isDomainBlacklisted($domain)) {
+                return true;
+            }
+        } catch (\Exception $e) {
+            // Log error but continue with config check
+            Log::warning('Database domain blacklist check failed', [
+                'domain' => $domain,
+                'error' => $e->getMessage()
+            ]);
+        }
+
+        // Fallback to config blacklist
         return in_array($domain, $this->config['domain_blacklist']);
     }
 
@@ -146,11 +175,34 @@ class UrlSafetyService
             'errors' => [],
         ];
 
+        // Check database patterns first (dynamic patterns)
+        try {
+            $dbCheck = MaliciousPattern::checkUrlAgainstPatterns($url);
+            if (!$dbCheck['safe']) {
+                return $dbCheck;
+            }
+        } catch (\Exception $e) {
+            // Log error but continue with config check
+            Log::warning('Database malicious pattern check failed', [
+                'url' => $url,
+                'error' => $e->getMessage()
+            ]);
+        }
+
+        // Fallback to config patterns
         foreach ($this->config['malicious_patterns'] as $pattern) {
-            if (preg_match($pattern, $url)) {
-                $results['safe'] = false;
-                $results['errors'][] = 'URL contains suspicious pattern';
-                break; // One match is enough
+            try {
+                if (preg_match($pattern, $url)) {
+                    $results['safe'] = false;
+                    $results['errors'][] = 'URL contains suspicious pattern';
+                    break; // One match is enough
+                }
+            } catch (\Exception $e) {
+                // Skip invalid regex patterns
+                Log::warning('Invalid regex pattern in config', [
+                    'pattern' => $pattern,
+                    'error' => $e->getMessage()
+                ]);
             }
         }
 
@@ -175,7 +227,7 @@ class UrlSafetyService
 
             // Use HEAD request to check content type without downloading
             $response = Http::timeout($this->config['content_check_timeout'])->withHeaders([
-                'User-Agent' => 'ShortSight-URL-Validator/1.0'
+                'User-Agent' => config('app.site_name', 'ShortSight') . '-URL-Validator/1.0'
             ])->head($url);
 
             if ($response->successful()) {
@@ -425,7 +477,7 @@ class UrlSafetyService
             // Use HEAD request to check content type without downloading
             $response = Http::timeout($this->config['content_check_timeout'])
                 ->withHeaders([
-                    'User-Agent' => 'ShortSight-URL-Validator/1.0',
+                    'User-Agent' => config('app.site_name', 'ShortSight') . '-URL-Validator/1.0',
                     'Accept' => '*/*',
                 ])
                 ->head($url);
@@ -438,8 +490,20 @@ class UrlSafetyService
                     $mimeType = explode(';', $contentType)[0];
                     $mimeType = trim(strtolower($mimeType));
 
-                    // Check against blacklist
-                    if (in_array($mimeType, $this->config['content_type_blacklist'])) {
+                    // Check against blacklist (database first, then config)
+                    $isRestricted = false;
+                    try {
+                        $isRestricted = ContentTypeRestriction::isMimeTypeRestricted($mimeType);
+                    } catch (\Exception $e) {
+                        Log::warning('Database content type check failed, using config fallback', [
+                            'mime_type' => $mimeType,
+                            'error' => $e->getMessage()
+                        ]);
+                        // Fallback to config check
+                        $isRestricted = in_array($mimeType, $this->config['content_type_blacklist']);
+                    }
+
+                    if ($isRestricted) {
                         $results['safe'] = false;
                         $results['errors'][] = "Blocked content type: {$mimeType}";
                     }
@@ -457,7 +521,7 @@ class UrlSafetyService
                 // If HEAD fails, try a lightweight GET request
                 $response = Http::timeout($this->config['content_check_timeout'])
                     ->withHeaders([
-                        'User-Agent' => 'ShortSight-URL-Validator/1.0',
+                        'User-Agent' => config('app.site_name', 'ShortSight') . '-URL-Validator/1.0',
                         'Range' => 'bytes=0-1023', // Only get first 1KB
                     ])
                     ->get($url);

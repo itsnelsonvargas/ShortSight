@@ -6,11 +6,11 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <!-- Primary Meta Tags -->
-    <title>ShortSight - Free URL Shortener with Advanced Analytics | Shorten Links Fast</title>
-    <meta name="title" content="ShortSight - Free URL Shortener with Advanced Analytics | Shorten Links Fast">
+    <title>{{ config('app.site_name') }} - Free URL Shortener with Advanced Analytics | Shorten Links Fast</title>
+    <meta name="title" content="{{ config('app.site_name') }} - Free URL Shortener with Advanced Analytics | Shorten Links Fast">
     <meta name="description" content="Create short, branded links with comprehensive click tracking, geolocation analytics, and custom domains. Free URL shortener with enterprise features - QR codes, password protection, and detailed analytics.">
     <meta name="keywords" content="URL shortener, link shortener, bitly alternative, custom domains, link analytics, QR codes, click tracking, geolocation, free URL shortener, branded links">
-    <meta name="author" content="ShortSight">
+    <meta name="author" content="{{ config('app.site_name') }}">
     <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
     <meta name="language" content="English">
     <meta name="revisit-after" content="7 days">
@@ -22,22 +22,22 @@
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="{{ url('/') }}">
-    <meta property="og:title" content="ShortSight - Free URL Shortener with Advanced Analytics">
+    <meta property="og:title" content="{{ config('app.site_name') }} - Free URL Shortener with Advanced Analytics">
     <meta property="og:description" content="Create short, branded links with comprehensive click tracking, geolocation analytics, and custom domains. Free URL shortener with enterprise features.">
-    <meta property="og:site_name" content="ShortSight">
+    <meta property="og:site_name" content="{{ config('app.site_name') }}">
     <meta property="og:locale" content="en_US">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary">
     <meta property="twitter:url" content="{{ url('/') }}">
-    <meta property="twitter:title" content="ShortSight - Free URL Shortener with Advanced Analytics">
+    <meta property="twitter:title" content="{{ config('app.site_name') }} - Free URL Shortener with Advanced Analytics">
     <meta property="twitter:description" content="Create short, branded links with comprehensive click tracking, geolocation analytics, and custom domains. Free URL shortener with enterprise features.">
-    <meta property="twitter:creator" content="@shortsight">
-    <meta property="twitter:site" content="@shortsight">
+    <meta property="twitter:creator" content="@{{ strtolower(config('app.site_name')) }}">
+    <meta property="twitter:site" content="@{{ strtolower(config('app.site_name')) }}">
 
     <!-- Favicon and Icons -->
     <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
-    <link rel="manifest" href="{{ asset('site.webmanifest') }}">
+    <link rel="manifest" href="{{ url('site.webmanifest') }}">
 
     <!-- DNS Prefetch for Performance -->
     <link rel="dns-prefetch" href="//fonts.googleapis.com">
@@ -50,7 +50,7 @@
     {
         "@context": "https://schema.org",
         "@type": "WebApplication",
-        "name": "ShortSight",
+        "name": "{{ config('app.site_name') }}",
         "description": "Free URL shortener with advanced analytics, custom domains, and QR code generation",
         "url": "{{ url('/') }}",
         "applicationCategory": "WebApplication",
@@ -72,7 +72,7 @@
         ],
         "publisher": {
             "@type": "Organization",
-            "name": "ShortSight",
+            "name": "{{ config('app.site_name') }}",
             "url": "{{ url('/') }}"
         },
         "potentialAction": {

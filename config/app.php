@@ -21,6 +21,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Site Name
+    |--------------------------------------------------------------------------
+    |
+    | This value is the public-facing name of your website/application.
+    | This is used in meta tags, titles, and other user-facing content.
+    | Set this to match your brand name.
+    |
+    */
+
+    'site_name' => env('SITE_NAME', 'ShortSight'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Environment
     |--------------------------------------------------------------------------
     |
