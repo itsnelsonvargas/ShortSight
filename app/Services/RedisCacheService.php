@@ -287,6 +287,72 @@ class RedisCacheService
     }
 
     /**
+     * Cache comprehensive URL validation results
+     *
+     * @param string $url
+     * @param array $validationResult
+     * @return void
+     */
+    public function cacheUrlValidation(string $url, array $validationResult): void
+    {
+        try {
+            $cacheKey = "url_validation:{$url}";
+            Cache::put($cacheKey, $validationResult, self::CACHE_TTL['url_validation']);
+        } catch (\Exception $e) {
+            \Log::warning('Failed to cache URL validation', [
+                'url' => $url,
+                'error' => $e->getMessage()
+            ]);
+        }
+    }
+
+    /**
+     * Get cached URL validation results
+     *
+     * @param string $url
+     * @return array|null
+     */
+    public function getCachedUrlValidation(string $url): ?array
+    {
+        $cacheKey = "url_validation:{$url}";
+        return Cache::get($cacheKey);
+    }
+
+    /**
+     * Invalidate URL validation cache
+     *
+     * @param string $url
+     * @return void
+     */
+    public function invalidateUrlValidationCache(string $url): void
+    {
+        Cache::forget("url_validation:{$url}");
+    }
+
+    /**
+     * Cache domain blacklist
+     *
+     * @param array $blacklist
+     * @return void
+     */
+    public function cacheDomainBlacklist(array $blacklist): void
+    {
+        $cacheKey = "domain_blacklist";
+        Cache::put($cacheKey, $blacklist, self::CACHE_TTL['link_metadata']); // Blacklist changes infrequently
+    }
+
+    /**
+     * Get cached domain blacklist
+     *
+     * @return array|null
+     */
+    public function getCachedDomainBlacklist(): ?array
+    {
+        $cacheKey = "domain_blacklist";
+        return Cache::get($cacheKey);
+    }
+
+    /**
      * Warm up cache with frequently accessed data
      *
      * @return void
