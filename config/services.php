@@ -32,6 +32,13 @@ return [
     'key' => env('GOOGLE_SAFE_BROWSING_KEY'),
     ],
 
+    // Google reCAPTCHA v3
+    'recaptcha' => [
+        'site_key' => env('RECAPTCHA_SITE_KEY'),
+        'secret_key' => env('RECAPTCHA_SECRET_KEY'),
+        'score_threshold' => env('RECAPTCHA_SCORE_THRESHOLD', 0.5),
+    ],
+
 
     'mailgun' => [
         'domain' => env('MAILGUN_DOMAIN'),

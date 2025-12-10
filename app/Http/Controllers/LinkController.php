@@ -8,6 +8,7 @@ use App\Models\Visitor;
 use Illuminate\Support\Str;
 use App\Services\UrlSafetyService;
 use App\Services\RedisCacheService;
+use App\Services\RecaptchaService;
 use App\Helpers\AnalyticsHelper; 
 
 
@@ -43,11 +44,35 @@ class LinkController extends Controller
             $validated = $request->validate([
                 'url'               => 'required|url|max:2048',
                 'customSlugInput'   => 'nullable|alpha_dash|max:20|min:3',
+                'recaptcha_token'   => 'nullable|string',
             ]);
 
             /***********************************************
             *                                              *
-            * 2. Check a custom slug if valid.             *
+            * 2. Validate reCAPTCHA for spam prevention    *
+            *                                              *
+            ************************************************/
+
+            $recaptchaService = app(RecaptchaService::class);
+            if ($recaptchaService->isEnabled()) {
+                $recaptchaToken = $request->input('recaptcha_token');
+
+                if (!$recaptchaToken) {
+                    $error = 'reCAPTCHA verification is required to prevent spam.';
+                    return $this->handleValidationError($request, ['recaptcha_token' => $error]);
+                }
+
+                $recaptchaResult = $recaptchaService->validateToken($recaptchaToken, 'shorten_url');
+
+                if (!$recaptchaResult['success']) {
+                    $error = 'reCAPTCHA verification failed. Please try again.';
+                    return $this->handleValidationError($request, ['recaptcha_token' => $error]);
+                }
+            }
+
+            /***********************************************
+            *                                              *
+            * 3. Check a custom slug if valid.             *
             *                                              *
             ************************************************/
 

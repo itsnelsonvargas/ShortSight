@@ -738,6 +738,26 @@ const user = ref({ name: 'Alex Doe' });
 // History stored in LocalStorage
 const history = ref([]);
 
+/**
+ * Execute Google reCAPTCHA v3
+ */
+const executeRecaptcha = (action) => {
+  return new Promise((resolve, reject) => {
+    if (!window.grecaptcha) {
+      reject(new Error('reCAPTCHA not loaded'));
+      return;
+    }
+
+    window.grecaptcha.ready(() => {
+      window.grecaptcha.execute('{{ config("services.recaptcha.site_key") }}', { action })
+        .then((token) => {
+          resolve(token);
+        })
+        .catch(reject);
+    });
+  });
+};
+
 const handleScroll = () => {
   isScrolled.value = window.scrollY > 20;
 };
@@ -787,8 +807,17 @@ const shortenUrl = async () => {
       }
     }
 
-    // Call the real API to shorten the URL
-    const response = await apiService.shortenUrl(url.value, customSlug.value);
+    // Execute reCAPTCHA v3 for anonymous link creation
+    let recaptchaToken = null;
+    try {
+      recaptchaToken = await executeRecaptcha('shorten_url');
+    } catch (recaptchaError) {
+      console.warn('reCAPTCHA failed:', recaptchaError);
+      // Continue without reCAPTCHA token - backend will handle this
+    }
+
+    // Call the real API to shorten the URL with reCAPTCHA token
+    const response = await apiService.shortenUrl(url.value, customSlug.value, recaptchaToken);
 
     const shortUrl = response.short_url || `short.sight/${response.slug}`;
     const newLink = {

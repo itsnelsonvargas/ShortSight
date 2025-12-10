@@ -113,13 +113,14 @@ class ApiService {
     /**
      * Shorten URL endpoint
      */
-    async shortenUrl(url, customSlug = null) {
+    async shortenUrl(url, customSlug = null, recaptchaToken = null) {
         return this.request('/links', {
             method: 'POST',
             data: {
                 url,
                 customSlugInput: customSlug,
                 customSlug: !!customSlug,
+                recaptcha_token: recaptchaToken,
             },
         });
     }
