@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Services\HealthCheckService;
 use App\Http\Controllers\ApiController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\LinkController;
@@ -78,4 +79,17 @@ Route::middleware('api.throttle')->group(function () {
 
     Route::get('/v1/check-url/{url}', [ApiController::class, 'isUrlSafe'])
                 ->name('api.checkUrl');
+});
+
+/*
+ * Health Check Routes (Public)
+ */
+Route::get('/health', function () {
+    $healthCheck = app(HealthCheckService::class);
+    return response()->json($healthCheck->getSystemStatus());
+});
+
+Route::get('/health/full', function () {
+    $healthCheck = app(HealthCheckService::class);
+    return response()->json($healthCheck->performFullHealthCheck());
 });

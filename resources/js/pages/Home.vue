@@ -82,6 +82,17 @@
 
               <!-- Input State -->
               <div v-if="!result" class="space-y-6">
+                <!-- Loading Overlay -->
+                <div v-if="loading" class="absolute inset-0 bg-white/80 backdrop-blur-sm rounded-2xl flex items-center justify-center z-10">
+                  <div class="text-center">
+                    <div class="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <i class="ph ph-spinner animate-spin text-2xl text-indigo-600"></i>
+                    </div>
+                    <p class="text-indigo-700 font-medium">Shortening your link...</p>
+                    <p class="text-indigo-500 text-sm mt-1">Validating URL and generating slug</p>
+                  </div>
+                </div>
+
                 <form @submit.prevent="shortenUrl" class="relative">
                   <div class="relative group">
                     <div class="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none">
@@ -92,16 +103,31 @@
                       v-model="url"
                       placeholder="Paste your long link here..."
                       required
-                      class="w-full pl-16 pr-40 py-6 bg-slate-50 border-2 border-slate-100 rounded-xl text-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all"
+                      :class="[
+                        'w-full pl-16 pr-40 py-6 bg-slate-50 border-2 rounded-xl text-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-4 transition-all',
+                        error ? 'border-red-300 focus:border-red-500 focus:ring-red-500/10' : 'border-slate-100 focus:border-indigo-500 focus:ring-indigo-500/10'
+                      ]"
                     >
                     <button
                       type="submit"
                       :disabled="loading || !url"
                       class="absolute right-3 top-3 bottom-3 bg-indigo-600 hover:bg-indigo-700 text-white px-8 rounded-lg font-bold text-lg transition-all transform active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-2 shadow-lg shadow-indigo-500/30"
                     >
-                      <i v-if="loading" class="ph ph-spinner animate-spin"></i>
+                      <i v-if="loading" class="ph ph-spinner animate-spin text-xl"></i>
+                      <span v-if="loading" class="text-sm">Processing...</span>
                       <span v-else>Shorten</span>
                     </button>
+                  </div>
+
+                  <!-- Error Messages -->
+                  <div v-if="error" class="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                    <div class="flex items-start gap-3">
+                      <i class="ph ph-warning-circle text-red-500 text-lg mt-0.5"></i>
+                      <div>
+                        <p class="text-red-800 font-medium">Unable to shorten URL</p>
+                        <p class="text-red-700 text-sm mt-1">{{ error }}</p>
+                      </div>
+                    </div>
                   </div>
                 </form>
 
@@ -126,8 +152,15 @@
                         v-model="customSlug"
                         type="text"
                         placeholder="my-link"
-                        class="flex-1 min-w-0 block w-full px-3 py-2 rounded-r-lg border border-slate-200 text-sm focus:ring-indigo-500 focus:border-indigo-500"
+                        :class="[
+                          'flex-1 min-w-0 block w-full px-3 py-2 rounded-r-lg border text-sm focus:ring-indigo-500 focus:border-indigo-500',
+                          slugError ? 'border-red-300 focus:border-red-500 focus:ring-red-500/10' : 'border-slate-200'
+                        ]"
                       >
+                    </div>
+                    <!-- Slug Error Message -->
+                    <div v-if="slugError" class="mt-2 p-2 bg-red-50 border border-red-200 rounded text-sm">
+                      <p class="text-red-700">{{ slugError }}</p>
                     </div>
                   </div>
                   <div :class="{'opacity-50 pointer-events-none': !isAuthenticated}">
@@ -681,6 +714,7 @@
 import { ref, onMounted, onUnmounted } from 'vue';
 import confetti from 'canvas-confetti';
 import QRCode from 'qrcode';
+import apiService from '../services/api';
 
 const url = ref('');
 const customSlug = ref('');
@@ -693,7 +727,11 @@ const showLoginModal = ref(false);
 const mobileMenuOpen = ref(false);
 const qrCodeUrl = ref('');
 
-// Mock Auth State
+// Error handling
+const error = ref(null);
+const slugError = ref(null);
+
+// Mock Auth State (will be replaced with real auth later)
 const isAuthenticated = ref(true);
 const user = ref({ name: 'Alex Doe' });
 
@@ -731,11 +769,28 @@ const logout = () => {
 
 const shortenUrl = async () => {
   if (!url.value) return;
+
+  // Clear previous errors
+  error.value = null;
+  slugError.value = null;
+
   loading.value = true;
 
-  setTimeout(async () => {
-    const code = customSlug.value || Math.random().toString(36).substring(7);
-    const shortUrl = `short.sight/${code}`;
+  try {
+    // Check slug availability if custom slug provided
+    if (customSlug.value) {
+      const isAvailable = await apiService.checkSlugAvailability(customSlug.value);
+      if (!isAvailable) {
+        slugError.value = `The slug "${customSlug.value}" is already taken. Please choose a different one.`;
+        loading.value = false;
+        return;
+      }
+    }
+
+    // Call the real API to shorten the URL
+    const response = await apiService.shortenUrl(url.value, customSlug.value);
+
+    const shortUrl = response.short_url || `short.sight/${response.slug}`;
     const newLink = {
       originalUrl: url.value,
       shortUrl: shortUrl,
@@ -755,23 +810,38 @@ const shortenUrl = async () => {
           light: '#ffffff'
         }
       });
-    } catch (error) {
-      console.error('Error generating QR code:', error);
+    } catch (qrError) {
+      console.warn('Error generating QR code:', qrError);
+      // Don't fail the whole process if QR code fails
     }
 
-    loading.value = false;
-
+    // Add to history
     history.value.unshift(newLink);
     if (history.value.length > 5) history.value.pop();
     localStorage.setItem('shortsight_history', JSON.stringify(history.value));
 
+    // Success animation
     confetti({
       particleCount: 100,
       spread: 70,
       origin: { y: 0.6 },
       colors: ['#4f46e5', '#9333ea', '#ec4899'],
     });
-  }, 1200);
+
+  } catch (err) {
+    // Handle API errors gracefully
+    error.value = err.message;
+
+    // Log for debugging (in production, this would go to error tracking)
+    console.error('URL shortening failed:', err);
+
+    // If it's a validation error, try to extract field-specific errors
+    if (err.message.includes('slug') || err.message.includes('taken')) {
+      slugError.value = err.message;
+    }
+  } finally {
+    loading.value = false;
+  }
 };
 
 const resetForm = () => {
@@ -781,6 +851,8 @@ const resetForm = () => {
   copied.value = false;
   showOptions.value = false;
   qrCodeUrl.value = '';
+  error.value = null;
+  slugError.value = null;
 };
 
 const copyToClipboard = () => {

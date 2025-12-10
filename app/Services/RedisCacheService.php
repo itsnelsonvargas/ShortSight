@@ -110,15 +110,22 @@ class RedisCacheService
      */
     public function cacheLinkMetadata(Link $link): void
     {
-        $cacheKey = "link_metadata:{$link->slug}";
-        $metadata = [
-            'id' => $link->id,
-            'url' => $link->url,
-            'slug' => $link->slug,
-            'created_at' => $link->created_at,
-            'updated_at' => $link->updated_at,
-        ];
-        Cache::put($cacheKey, $metadata, self::CACHE_TTL['link_metadata']);
+        try {
+            $cacheKey = "link_metadata:{$link->slug}";
+            $metadata = [
+                'id' => $link->id,
+                'url' => $link->url,
+                'slug' => $link->slug,
+                'created_at' => $link->created_at,
+                'updated_at' => $link->updated_at,
+            ];
+            Cache::put($cacheKey, $metadata, self::CACHE_TTL['link_metadata']);
+        } catch (\Exception $e) {
+            \Log::warning('Failed to cache link metadata', [
+                'slug' => $link->slug,
+                'error' => $e->getMessage()
+            ]);
+        }
     }
 
     /**
@@ -129,8 +136,16 @@ class RedisCacheService
      */
     public function getCachedLinkMetadata(string $slug): ?array
     {
-        $cacheKey = "link_metadata:{$slug}";
-        return Cache::get($cacheKey);
+        try {
+            $cacheKey = "link_metadata:{$slug}";
+            return Cache::get($cacheKey);
+        } catch (\Exception $e) {
+            \Log::warning('Failed to get cached link metadata', [
+                'slug' => $slug,
+                'error' => $e->getMessage()
+            ]);
+            return null;
+        }
     }
 
     /**
@@ -142,8 +157,15 @@ class RedisCacheService
      */
     public function cacheAnalyticsData(string $slug, array $analytics): void
     {
-        $cacheKey = "analytics:{$slug}";
-        Cache::put($cacheKey, $analytics, self::CACHE_TTL['analytics']);
+        try {
+            $cacheKey = "analytics:{$slug}";
+            Cache::put($cacheKey, $analytics, self::CACHE_TTL['analytics']);
+        } catch (\Exception $e) {
+            \Log::warning('Failed to cache analytics data', [
+                'slug' => $slug,
+                'error' => $e->getMessage()
+            ]);
+        }
     }
 
     /**
@@ -154,8 +176,16 @@ class RedisCacheService
      */
     public function getCachedAnalyticsData(string $slug): ?array
     {
-        $cacheKey = "analytics:{$slug}";
-        return Cache::get($cacheKey);
+        try {
+            $cacheKey = "analytics:{$slug}";
+            return Cache::get($cacheKey);
+        } catch (\Exception $e) {
+            \Log::warning('Failed to get cached analytics data', [
+                'slug' => $slug,
+                'error' => $e->getMessage()
+            ]);
+            return null;
+        }
     }
 
     /**
@@ -327,6 +357,16 @@ class RedisCacheService
     public function invalidateUrlValidationCache(string $url): void
     {
         Cache::forget("url_validation:{$url}");
+    }
+
+    /**
+     * Invalidate domain blacklist cache
+     *
+     * @return void
+     */
+    public function invalidateDomainBlacklistCache(): void
+    {
+        Cache::forget("domain_blacklist");
     }
 
     /**

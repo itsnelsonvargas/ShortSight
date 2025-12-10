@@ -9,6 +9,33 @@ window.axios = axios;
 
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 
+// Configure axios defaults for better error handling
+window.axios.defaults.timeout = 10000; // 10 second timeout
+window.axios.defaults.headers.common['Accept'] = 'application/json';
+
+// Add response interceptor for global error handling
+window.axios.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        // Handle common error scenarios
+        if (error.code === 'ECONNABORTED') {
+            // Timeout error
+            error.userMessage = 'Request timed out. Please check your connection and try again.';
+        } else if (!error.response) {
+            // Network error
+            error.userMessage = 'Network error. Please check your internet connection.';
+        } else if (error.response.status >= 500) {
+            // Server error
+            error.userMessage = 'Server error. Please try again later.';
+        } else if (error.response.status === 429) {
+            // Rate limited
+            error.userMessage = 'Too many requests. Please wait a moment and try again.';
+        }
+
+        return Promise.reject(error);
+    }
+);
+
 /**
  * Echo exposes an expressive API for subscribing to channels and listening
  * for events that are broadcast by Laravel. Echo and event broadcasting

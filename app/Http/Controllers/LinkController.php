@@ -34,89 +34,140 @@ class LinkController extends Controller
 
     
     public function storeWithoutUserAccount(Request $request)
-    {   
-        /*
-        *
-        * storeWithoutUserAccount(Request $request)
-        * 1. Validate the URL and custom slug input
-        *
-        */
-        $request->validate([
-            'url'               => 'required|url',
-            'customSlugInput'   => 'nullable|alpha_dash|max:20',
-        ]);
-
-        $link = new Link();
-        $link->url = $request->url;
-
-        /***********************************************
-        *                                              *
-        * 2. Check a custom slug if valid.             *
-        *                                              *
-        ************************************************/
-
-        if ($request->has('customSlug')) {
-            $slug = $request->customSlugInput;
-
-            if (Link::where('slug', $slug)->exists()) {
-                return back()->withErrors(['customSlugInput' => 'This custom slug is already taken.']);
-            }
-        } else {
-            do {
-                $slug = Str::random(7);
-            } while (Link::where('slug', $slug)->exists());
-        }
-
-        /****************************************************************
-        *                                                               *
-        * Check if the URL is malicious using Google Safe Browsing API  *
-        *                                                               *
-        ****************************************************************/
-
-        $cacheService = app(RedisCacheService::class);
-
-        // Check cached URL safety first
-        $isSafe = $cacheService->getCachedUrlSafety($request->url);
-
-        if ($isSafe === null) {
-            // Not in cache, check with service
-            $urlSafetyService = new UrlSafetyService();
-            $isMalicious = $urlSafetyService->isMalicious($request->url);
-
-            // Cache the result
-            $cacheService->cacheUrlSafety($request->url, !$isMalicious);
-            $isSafe = !$isMalicious;
-        }
-
-        if (!$isSafe) {
-            return back()->withErrors(['url' => 'The URL is malicious.']);
-        }
-
-      
-        $link->slug = $slug;
-        $link->save();
-
-
-        /**
-         * Return the SLUG and URL
-         */
-        $data = [
-            'newSlug'       => $slug,
-            'submittedUrl'  => $request->url,
-            'short_url'     => url($slug),
-        ];
-
-        // Return JSON for API requests
-        if ($request->expectsJson() || $request->is('api/*')) {
-            return response()->json([
-                'success' => true,
-                'slug' => $slug,
-                'short_url' => url($slug),
-                'original_url' => $request->url,
+    {
+        try {
+            /*
+            * storeWithoutUserAccount(Request $request)
+            * 1. Validate the URL and custom slug input
+            */
+            $validated = $request->validate([
+                'url'               => 'required|url|max:2048',
+                'customSlugInput'   => 'nullable|alpha_dash|max:20|min:3',
             ]);
-        }
 
-        return view('welcome', compact('data'));
+            /***********************************************
+            *                                              *
+            * 2. Check a custom slug if valid.             *
+            *                                              *
+            ************************************************/
+
+            $slug = null;
+            if ($request->has('customSlug') && !empty($request->customSlugInput)) {
+                $slug = trim($request->customSlugInput);
+
+                // Check if slug is available
+                if (Link::where('slug', $slug)->exists()) {
+                    $message = 'The custom slug "' . $slug . '" is already taken. Please choose a different one.';
+                    return $this->handleValidationError($request, ['customSlugInput' => $message]);
+                }
+
+                // Check for reserved words
+                if (in_array(strtolower($slug), ['admin', 'api', 'www', 'dashboard', 'login', 'register'])) {
+                    $message = 'This slug is reserved and cannot be used.';
+                    return $this->handleValidationError($request, ['customSlugInput' => $message]);
+                }
+            } else {
+                // Generate unique slug with retry limit
+                $attempts = 0;
+                $maxAttempts = 10;
+
+                do {
+                    if ($attempts >= $maxAttempts) {
+                        $error = 'Unable to generate a unique slug. Please try with a custom slug.';
+                        return $this->handleError($request, $error, 'slug_generation_failed');
+                    }
+
+                    $slug = Str::random(7);
+                    $attempts++;
+                } while (Link::where('slug', $slug)->exists());
+            }
+
+            /****************************************************************
+            *                                                               *
+            * Comprehensive URL validation including security checks        *
+            *                                                               *
+            ****************************************************************/
+
+            $cacheService = app(RedisCacheService::class);
+            $urlSafetyService = app(UrlSafetyService::class);
+
+            // Check cached comprehensive validation first
+            $validationResult = $cacheService->getCachedUrlValidation($request->url);
+
+            if ($validationResult === null) {
+                // Not in cache, perform comprehensive validation
+                try {
+                    $validationResult = $urlSafetyService->validateUrl($request->url);
+
+                    // Cache the comprehensive validation result
+                    $cacheService->cacheUrlValidation($request->url, $validationResult);
+                } catch (\Exception $e) {
+                    \Log::error('URL validation failed', [
+                        'url' => $request->url,
+                        'error' => $e->getMessage()
+                    ]);
+
+                    $error = 'Unable to validate URL at this time. Please try again later.';
+                    return $this->handleError($request, $error, 'validation_service_unavailable');
+                }
+            }
+
+            // Check if URL passed all validation checks
+            if (!$validationResult['is_safe']) {
+                $errorMessage = 'URL validation failed: ' . implode(', ', $validationResult['errors']);
+                return $this->handleValidationError($request, ['url' => $errorMessage]);
+            }
+
+            // Create the link
+            try {
+                $link = new Link();
+                $link->url = $request->url;
+                $link->slug = $slug;
+                $link->save();
+            } catch (\Exception $e) {
+                \Log::error('Failed to save link', [
+                    'url' => $request->url,
+                    'slug' => $slug,
+                    'error' => $e->getMessage()
+                ]);
+
+                $error = 'Unable to create your short link. Please try again.';
+                return $this->handleError($request, $error, 'database_save_failed');
+            }
+
+            /**
+             * Return the SLUG and URL
+             */
+            $data = [
+                'newSlug'       => $slug,
+                'submittedUrl'  => $request->url,
+                'short_url'     => url($slug),
+            ];
+
+            // Return JSON for API requests
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return response()->json([
+                    'success' => true,
+                    'slug' => $slug,
+                    'short_url' => url($slug),
+                    'original_url' => $request->url,
+                ]);
+            }
+
+            return view('welcome', compact('data'));
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return $this->handleValidationError($request, $e->errors());
+        } catch (\Exception $e) {
+            \Log::error('Unexpected error in link creation', [
+                'url' => $request->url ?? null,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            $error = 'An unexpected error occurred. Please try again later.';
+            return $this->handleError($request, $error, 'unexpected_error');
+        }
     }
     
     public function downloadPng($slug)
@@ -140,24 +191,90 @@ class LinkController extends Controller
 
             if (!$link) {
                 // If not in cache, get from database
-                $link = Link::where('slug', $slug)->firstOrFail();
+                $link = Link::where('slug', $slug)->first();
+
+                if (!$link) {
+                    \Log::info('Link not found', ['slug' => $slug, 'ip' => request()->ip()]);
+                    return abort(404);
+                }
 
                 // Cache the result for future requests
-                $cacheService->cacheSlugLookup($slug, $link);
-                $cacheService->cacheLinkMetadata($link);
+                try {
+                    $cacheService->cacheSlugLookup($slug, $link);
+                    $cacheService->cacheLinkMetadata($link);
+                } catch (\Exception $e) {
+                    // Log cache error but continue with redirect
+                    \Log::warning('Failed to cache link data', [
+                        'slug' => $slug,
+                        'error' => $e->getMessage()
+                    ]);
+                }
             }
 
-            // Track visitor analytics asynchronously
-            $this->trackVisitorAnalytics($slug, request());
+            // Validate the destination URL
+            if (empty($link->url) || !filter_var($link->url, FILTER_VALIDATE_URL)) {
+                \Log::error('Invalid destination URL for slug', [
+                    'slug' => $slug,
+                    'url' => $link->url,
+                    'ip' => request()->ip()
+                ]);
 
-            // Increment click count in cache
-            $cacheService->incrementClickCount($slug);
+                return response()->view('errors.link-error', [
+                    'message' => 'This link appears to be corrupted and cannot be accessed.',
+                    'title' => 'Invalid Link',
+                    'slug' => $slug
+                ], 500);
+            }
 
-            //redirect to the URL based on the slug
-            return redirect($link->url);
+            // Track visitor analytics asynchronously (don't fail if analytics fail)
+            try {
+                $this->trackVisitorAnalytics($slug, request());
+            } catch (\Exception $e) {
+                \Log::warning('Analytics tracking failed', [
+                    'slug' => $slug,
+                    'error' => $e->getMessage()
+                ]);
+            }
+
+            // Increment click count in cache (don't fail if caching fails)
+            try {
+                $cacheService->incrementClickCount($slug);
+            } catch (\Exception $e) {
+                \Log::warning('Click count increment failed', [
+                    'slug' => $slug,
+                    'error' => $e->getMessage()
+                ]);
+            }
+
+            // Perform the redirect
+            return redirect($link->url, 302);
+
+        } catch (\Illuminate\Database\QueryException $e) {
+            \Log::error('Database error during link lookup', [
+                'slug' => $slug,
+                'error' => $e->getMessage(),
+                'ip' => request()->ip()
+            ]);
+
+            return response()->view('errors.link-error', [
+                'message' => 'Service temporarily unavailable. Please try again later.',
+                'title' => 'Service Unavailable',
+                'slug' => $slug
+            ], 503);
+
         } catch (\Exception $e) {
-            //if no link is found, it will throw a 404 error
-            return abort(404);
+            \Log::error('Unexpected error during link redirect', [
+                'slug' => $slug,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'ip' => request()->ip()
+            ]);
+
+            return response()->view('errors.link-error', [
+                'message' => 'An unexpected error occurred. Please try again later.',
+                'title' => 'Link Error',
+                'slug' => $slug
+            ], 500);
         }
     }
 
@@ -233,9 +350,42 @@ class LinkController extends Controller
 
     public function testQR()
     {
- 
+
         $data = 'https://facebook.com';
         return view('generateQR', compact('data'));
- 
+
+    }
+
+    /**
+     * Handle validation errors consistently
+     */
+    protected function handleValidationError(Request $request, array $errors)
+    {
+        if ($request->expectsJson() || $request->is('api/*')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $errors,
+                'type' => 'validation_error'
+            ], 422);
+        }
+
+        return back()->withErrors($errors)->withInput();
+    }
+
+    /**
+     * Handle general errors consistently
+     */
+    protected function handleError(Request $request, string $message, string $type = 'error')
+    {
+        if ($request->expectsJson() || $request->is('api/*')) {
+            return response()->json([
+                'success' => false,
+                'message' => $message,
+                'type' => $type
+            ], 500);
+        }
+
+        return back()->withErrors(['general' => $message])->withInput();
     }
 }
