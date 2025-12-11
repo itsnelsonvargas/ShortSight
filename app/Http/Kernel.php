@@ -68,5 +68,6 @@ class Kernel extends HttpKernel
         'strict.throttle' => \App\Http\Middleware\StrictRateLimit::class,
         'api.throttle' => \App\Http\Middleware\ApiRateLimit::class,
         'link.creation.throttle' => \App\Http\Middleware\LinkCreationRateLimit::class,
+        'premium.feature' => \App\Http\Middleware\CheckPremiumFeature::class,
     ];
 }

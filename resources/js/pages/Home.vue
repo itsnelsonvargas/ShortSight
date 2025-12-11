@@ -170,6 +170,30 @@
                     </label>
                     <input type="date" class="block w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:ring-indigo-500 focus:border-indigo-500 text-slate-500">
                   </div>
+                  <div :class="{'opacity-50 pointer-events-none': !isAuthenticated}">
+                    <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 flex justify-between">
+                      Password Protection
+                      <span v-if="!isAuthenticated" class="text-indigo-500 text-[10px] bg-indigo-50 px-2 py-0.5 rounded-full">PREMIUM</span>
+                    </label>
+                    <div class="relative">
+                      <input
+                        v-model="linkPassword"
+                        type="password"
+                        placeholder="Set password (optional)"
+                        :disabled="!isAuthenticated"
+                        class="block w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:ring-indigo-500 focus:border-indigo-500 pr-10"
+                      >
+                      <button
+                        type="button"
+                        @click="togglePasswordVisibility"
+                        :disabled="!isAuthenticated"
+                        class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600"
+                      >
+                        <i class="ph" :class="showPasswordField ? 'ph-eye-slash' : 'ph-eye'"></i>
+                      </button>
+                    </div>
+                    <p class="text-xs text-slate-400 mt-1">Require password to access this link</p>
+                  </div>
                 </div>
               </div>
 
@@ -718,6 +742,7 @@ import apiService from '../services/api';
 
 const url = ref('');
 const customSlug = ref('');
+const linkPassword = ref('');
 const loading = ref(false);
 const result = ref(null);
 const copied = ref(false);
@@ -726,6 +751,7 @@ const isScrolled = ref(false);
 const showLoginModal = ref(false);
 const mobileMenuOpen = ref(false);
 const qrCodeUrl = ref('');
+const showPasswordField = ref(false);
 
 // Error handling
 const error = ref(null);
@@ -787,6 +813,14 @@ const logout = () => {
   isAuthenticated.value = false;
 };
 
+const togglePasswordVisibility = () => {
+  showPasswordField.value = !showPasswordField.value;
+  const passwordInput = document.querySelector('input[placeholder="Set password (optional)"]');
+  if (passwordInput) {
+    passwordInput.type = showPasswordField.value ? 'text' : 'password';
+  }
+};
+
 const shortenUrl = async () => {
   if (!url.value) return;
 
@@ -816,8 +850,8 @@ const shortenUrl = async () => {
       // Continue without reCAPTCHA token - backend will handle this
     }
 
-    // Call the real API to shorten the URL with reCAPTCHA token
-    const response = await apiService.shortenUrl(url.value, customSlug.value, recaptchaToken);
+    // Call the real API to shorten the URL with reCAPTCHA token and password
+    const response = await apiService.shortenUrl(url.value, customSlug.value, recaptchaToken, linkPassword.value);
 
     const shortUrl = response.short_url || `short.sight/${response.slug}`;
     const newLink = {
@@ -876,12 +910,14 @@ const shortenUrl = async () => {
 const resetForm = () => {
   url.value = '';
   customSlug.value = '';
+  linkPassword.value = '';
   result.value = null;
   copied.value = false;
   showOptions.value = false;
   qrCodeUrl.value = '';
   error.value = null;
   slugError.value = null;
+  showPasswordField.value = false;
 };
 
 const copyToClipboard = () => {

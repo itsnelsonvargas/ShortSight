@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Services\RedisCacheService;
+use App\Services\PasswordEncryptionService;
 
 class Link extends Model
 {
@@ -25,6 +26,9 @@ class Link extends Model
         'url',
         'slug',
         'is_disabled',
+        'is_password_protected',
+        'password_hash',
+        'password_salt',
     ];
 
     /**
@@ -34,6 +38,7 @@ class Link extends Model
      */
     protected $casts = [
         'is_disabled' => 'boolean',
+        'is_password_protected' => 'boolean',
     ];
 
     /**
@@ -58,6 +63,50 @@ class Link extends Model
     public function getClickCountAttribute()
     {
         return $this->visitors()->count();
+    }
+
+    /**
+     * Set the password for link protection
+     *
+     * @param string $password
+     * @return void
+     */
+    public function setPassword(string $password): void
+    {
+        $encryptionService = app(PasswordEncryptionService::class);
+        $result = $encryptionService->hashPassword($password);
+
+        $this->password_hash = $result['hash'];
+        $this->password_salt = $result['salt'];
+        $this->is_password_protected = true;
+    }
+
+    /**
+     * Verify a password against the stored hash
+     *
+     * @param string $password
+     * @return bool
+     */
+    public function verifyPassword(string $password): bool
+    {
+        if (!$this->is_password_protected || empty($this->password_hash) || empty($this->password_salt)) {
+            return false;
+        }
+
+        $encryptionService = app(PasswordEncryptionService::class);
+        return $encryptionService->verifyPassword($password, $this->password_hash, $this->password_salt);
+    }
+
+    /**
+     * Remove password protection from the link
+     *
+     * @return void
+     */
+    public function removePassword(): void
+    {
+        $this->is_password_protected = false;
+        $this->password_hash = null;
+        $this->password_salt = null;
     }
 
     /**

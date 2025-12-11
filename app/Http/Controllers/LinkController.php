@@ -45,6 +45,7 @@ class LinkController extends Controller
                 'url'               => 'required|url|max:2048',
                 'customSlugInput'   => 'nullable|alpha_dash|max:20|min:3',
                 'recaptcha_token'   => 'nullable|string',
+                'password'          => 'nullable|string|min:4|max:255',
             ]);
 
             /***********************************************
@@ -148,6 +149,22 @@ class LinkController extends Controller
                 $link = new Link();
                 $link->url = $request->url;
                 $link->slug = $slug;
+
+                // Handle password protection (premium feature)
+                if ($request->filled('password')) {
+                    // Check if user is authenticated (premium feature)
+                    if (!auth()->check()) {
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'Password protection requires a premium account. Please upgrade to use this feature.',
+                            'type' => 'premium_required'
+                        ], 403);
+                    }
+
+                    // Set password for the link
+                    $link->setPassword($request->password);
+                }
+
                 $link->save();
             } catch (\Exception $e) {
                 \Log::error('Failed to save link', [
@@ -232,6 +249,31 @@ class LinkController extends Controller
                     \Log::warning('Failed to cache link data', [
                         'slug' => $slug,
                         'error' => $e->getMessage()
+                    ]);
+                }
+            }
+
+            // Check if link is disabled
+            if ($link->is_disabled) {
+                return response()->view('errors.link-error', [
+                    'message' => 'This link has been disabled by the owner.',
+                    'title' => 'Link Disabled',
+                    'slug' => $slug
+                ], 410);
+            }
+
+            // Check if link is password protected
+            if ($link->is_password_protected) {
+                // Check if password was already verified in this session
+                $sessionKey = "link_password_verified_{$slug}";
+                $verified = session($sessionKey, false);
+
+                if (!$verified) {
+                    // Show password prompt page
+                    return view('password-prompt', [
+                        'slug' => $slug,
+                        'title' => $link->title ?: 'Password Protected Link',
+                        'description' => $link->description ?: 'This link requires a password to access.'
                     ]);
                 }
             }
@@ -396,6 +438,74 @@ class LinkController extends Controller
         }
 
         return back()->withErrors($errors)->withInput();
+    }
+
+    /**
+     * Verify password for password-protected links
+     */
+    public function verifyPassword(Request $request, $slug)
+    {
+        try {
+            $request->validate([
+                'password' => 'required|string|max:255'
+            ]);
+
+            // Get the link
+            $cacheService = app(RedisCacheService::class);
+            $link = $cacheService->getCachedSlugLookup($slug);
+
+            if (!$link) {
+                $link = Link::where('slug', $slug)->first();
+            }
+
+            if (!$link) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Link not found.'
+                ], 404);
+            }
+
+            if (!$link->is_password_protected) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'This link is not password protected.'
+                ], 400);
+            }
+
+            // Verify the password
+            if ($link->verifyPassword($request->password)) {
+                // Store verification in session
+                $sessionKey = "link_password_verified_{$slug}";
+                session([$sessionKey => true]);
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Password verified successfully.'
+                ]);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid password. Please try again.'
+                ], 401);
+            }
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid input data.',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            \Log::error('Password verification error', [
+                'slug' => $slug,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while verifying the password.'
+            ], 500);
+        }
     }
 
     /**

@@ -48,6 +48,7 @@ Route::middleware(['auth:sanctum', 'api.throttle'])->group(function () {
  */
 Route::middleware('link.creation.throttle')->post('/links', [LinkController::class, 'storeWithoutUserAccount']);
 Route::middleware('api.throttle')->get('/check-slug', [LinkController::class, 'checkSlug']);
+Route::middleware('api.throttle')->post('/links/{slug}/verify-password', [LinkController::class, 'verifyPassword']);
 
 /*********************************
 *                                *
