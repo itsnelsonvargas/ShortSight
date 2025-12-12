@@ -75,3 +75,26 @@ function getLocationData(string $ipAddress): array {
         ];
     }
 }
+
+/**
+ * Build full visitor info from lightweight snapshot captured during request.
+ *
+ * @param array<string, mixed> $visitorData
+ * @return array<string, mixed>
+ */
+function getVisitorInfoFromData(array $visitorData): array {
+    $agent = new Agent();
+    $agent->setUserAgent($visitorData['user_agent'] ?? '');
+
+    $ipAddress = $visitorData['ip_address'] ?? '0.0.0.0';
+
+    return [
+        'ip_address' => $ipAddress,
+        'user_agent' => $visitorData['user_agent'] ?? '',
+        'browser'    => $agent->browser(),
+        'device'     => getDeviceType($agent),
+        'platform'   => $agent->platform(),
+        'referer'    => $visitorData['referer'] ?? 'N/A',
+        'location'   => getLocationData($ipAddress),
+    ];
+}

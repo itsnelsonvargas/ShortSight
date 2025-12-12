@@ -4,12 +4,12 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Link;
-use App\Models\Visitor;
 use Illuminate\Support\Str;
 use App\Services\UrlSafetyService;
 use App\Services\RedisCacheService;
 use App\Services\RecaptchaService;
 use App\Helpers\AnalyticsHelper; 
+use App\Jobs\ProcessVisitorAnalytics;
 
 
 class LinkController extends Controller
@@ -20,10 +20,10 @@ class LinkController extends Controller
         $newLinks = $newLinks->toArray();
         $data = [
             'newLinks'      => $newLinks,
-           
+            
             'submittedUrl'  => '',
         ];
- 
+  
         // Code to show form to create a new link
         return view('welcome', compact('data'));
     }
@@ -33,7 +33,7 @@ class LinkController extends Controller
         // Code to save a new link
     }
 
-    
+     
     public function storeWithoutUserAccount(Request $request)
     {
         try {
@@ -211,7 +211,7 @@ class LinkController extends Controller
             return $this->handleError($request, $error, 'unexpected_error');
         }
     }
-    
+     
     public function downloadPng($slug)
     {
         $png = QrCode::format('png')
@@ -354,33 +354,15 @@ class LinkController extends Controller
      */
     private function trackVisitorAnalytics(string $slug, Request $request): void
     {
-        try {
-            // Get visitor information
-            $visitorInfo = getVisitorInfo($request);
+        // Capture a lightweight snapshot to pass into the queue job.
+        $visitorSnapshot = [
+            'ip_address' => $request->ip() === '127.0.0.1' ? '103.192.185.61' : $request->ip(),
+            'user_agent' => $request->header('user-agent'),
+            'referer' => $request->header('referer'),
+        ];
 
-            // Create visitor record asynchronously to avoid slowing down redirects
-            Visitor::create([
-                'slug' => $slug,
-                'ip_address' => $visitorInfo['ip_address'],
-                'user_agent' => $visitorInfo['user_agent'],
-                'browser' => $visitorInfo['browser'],
-                'device' => $visitorInfo['device'],
-                'platform' => $visitorInfo['platform'],
-                'referer' => $visitorInfo['referer'],
-                'country' => $visitorInfo['location']['country'],
-                'city' => $visitorInfo['location']['city'],
-                'region' => $visitorInfo['location']['region'],
-                'postal_code' => $visitorInfo['location']['postal_code'],
-                'latitude' => $visitorInfo['location']['latitude'],
-                'longitude' => $visitorInfo['location']['longitude'],
-            ]);
-        } catch (\Exception $e) {
-            // Log analytics error but don't fail the redirect
-            \Log::error('Failed to track visitor analytics', [
-                'slug' => $slug,
-                'error' => $e->getMessage()
-            ]);
-        }
+        // Dispatch async analytics processing so redirects stay fast.
+        ProcessVisitorAnalytics::dispatch($slug, $visitorSnapshot);
     }
 
     public function checkSlug(Request $request)
