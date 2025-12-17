@@ -26,6 +26,8 @@ class Link extends Model
         'url',
         'slug',
         'is_disabled',
+        'expires_at',
+        'auto_delete_expired',
         'is_password_protected',
         'password_hash',
         'password_salt',
@@ -39,6 +41,8 @@ class Link extends Model
     protected $casts = [
         'is_disabled' => 'boolean',
         'is_password_protected' => 'boolean',
+        'auto_delete_expired' => 'boolean',
+        'expires_at' => 'datetime',
     ];
 
     /**
@@ -107,6 +111,45 @@ class Link extends Model
         $this->is_password_protected = false;
         $this->password_hash = null;
         $this->password_salt = null;
+    }
+
+    /**
+     * Check if the link has expired
+     *
+     * @return bool
+     */
+    public function isExpired(): bool
+    {
+        return $this->expires_at && $this->expires_at->isPast();
+    }
+
+    /**
+     * Check if the link should be auto-deleted when expired
+     *
+     * @return bool
+     */
+    public function shouldAutoDelete(): bool
+    {
+        return $this->auto_delete_expired && $this->isExpired();
+    }
+
+    /**
+     * Scope to get only active (non-expired) links
+     */
+    public function scopeActive($query)
+    {
+        return $query->where(function ($q) {
+            $q->whereNull('expires_at')
+              ->orWhere('expires_at', '>', now());
+        });
+    }
+
+    /**
+     * Scope to get only expired links
+     */
+    public function scopeExpired($query)
+    {
+        return $query->where('expires_at', '<=', now());
     }
 
     /**

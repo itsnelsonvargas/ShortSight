@@ -168,7 +168,22 @@
                       Expiration Date
                       <span v-if="!isAuthenticated" class="text-indigo-500 text-[10px] bg-indigo-50 px-2 py-0.5 rounded-full">PRO</span>
                     </label>
-                    <input type="date" class="block w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:ring-indigo-500 focus:border-indigo-500 text-slate-500">
+                    <input
+                      v-model="expiresAt"
+                      type="datetime-local"
+                      :disabled="!isAuthenticated"
+                      class="block w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:ring-indigo-500 focus:border-indigo-500 text-slate-900 disabled:text-slate-500"
+                      :min="minExpirationDate"
+                    >
+                    <div class="mt-2 flex items-center gap-2">
+                      <input
+                        v-model="autoDeleteExpired"
+                        type="checkbox"
+                        :disabled="!isAuthenticated"
+                        class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                      >
+                      <label class="text-xs text-slate-600">Auto-delete when expired</label>
+                    </div>
                   </div>
                   <div :class="{'opacity-50 pointer-events-none': !isAuthenticated}">
                     <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 flex justify-between">
@@ -743,6 +758,8 @@ import apiService from '../services/api';
 const url = ref('');
 const customSlug = ref('');
 const linkPassword = ref('');
+const expiresAt = ref('');
+const autoDeleteExpired = ref(false);
 const loading = ref(false);
 const result = ref(null);
 const copied = ref(false);
@@ -763,6 +780,13 @@ const user = ref({ name: 'Alex Doe' });
 
 // History stored in LocalStorage
 const history = ref([]);
+
+// Computed property for minimum expiration date (1 hour from now)
+const minExpirationDate = computed(() => {
+  const now = new Date();
+  now.setHours(now.getHours() + 1);
+  return now.toISOString().slice(0, 16); // Format for datetime-local input
+});
 
 /**
  * Execute Google reCAPTCHA v3
@@ -850,8 +874,15 @@ const shortenUrl = async () => {
       // Continue without reCAPTCHA token - backend will handle this
     }
 
-    // Call the real API to shorten the URL with reCAPTCHA token and password
-    const response = await apiService.shortenUrl(url.value, customSlug.value, recaptchaToken, linkPassword.value);
+    // Call the real API to shorten the URL with reCAPTCHA token, password, and expiration
+    const response = await apiService.shortenUrl(
+      url.value,
+      customSlug.value,
+      recaptchaToken,
+      linkPassword.value,
+      expiresAt.value,
+      autoDeleteExpired.value
+    );
 
     const shortUrl = response.short_url || `short.sight/${response.slug}`;
     const newLink = {
@@ -911,6 +942,8 @@ const resetForm = () => {
   url.value = '';
   customSlug.value = '';
   linkPassword.value = '';
+  expiresAt.value = '';
+  autoDeleteExpired.value = false;
   result.value = null;
   copied.value = false;
   showOptions.value = false;

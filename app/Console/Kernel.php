@@ -16,7 +16,11 @@ class Kernel extends ConsoleKernel
     
     protected function schedule(Schedule $schedule): void
     {
-        // $schedule->command('inspire')->hourly();
+        // Clean up expired links daily at 2 AM
+        $schedule->command('links:cleanup-expired')
+                ->dailyAt('02:00')
+                ->withoutOverlapping()
+                ->runInBackground();
     }
 
     /**

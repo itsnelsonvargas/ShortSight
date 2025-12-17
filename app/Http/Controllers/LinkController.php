@@ -262,6 +262,20 @@ class LinkController extends Controller
                 ], 410);
             }
 
+            // Check if link has expired
+            if ($link->isExpired()) {
+                // If auto-delete is enabled, delete the link
+                if ($link->shouldAutoDelete()) {
+                    $link->delete();
+                }
+
+                return response()->view('errors.link-error', [
+                    'message' => 'This link has expired and is no longer available.',
+                    'title' => 'Link Expired',
+                    'slug' => $slug
+                ], 410);
+            }
+
             // Check if link is password protected
             if ($link->is_password_protected) {
                 // Check if password was already verified in this session
@@ -417,17 +431,20 @@ class LinkController extends Controller
 
             // Transform the data for frontend consumption
             $links->getCollection()->transform(function ($link) {
-                return [
-                    'id' => $link->id,
-                    'slug' => $link->slug,
-                    'url' => $link->url,
-                    'short_url' => url($link->slug),
-                    'is_password_protected' => $link->is_password_protected,
-                    'is_disabled' => $link->is_disabled,
-                    'clicks' => $link->visitors->first()->click_count ?? 0,
-                    'created_at' => $link->created_at,
-                    'updated_at' => $link->updated_at,
-                ];
+                    return [
+                        'id' => $link->id,
+                        'slug' => $link->slug,
+                        'url' => $link->url,
+                        'short_url' => url($link->slug),
+                        'is_password_protected' => $link->is_password_protected,
+                        'is_disabled' => $link->is_disabled,
+                        'expires_at' => $link->expires_at,
+                        'auto_delete_expired' => $link->auto_delete_expired,
+                        'is_expired' => $link->isExpired(),
+                        'clicks' => $link->visitors->first()->click_count ?? 0,
+                        'created_at' => $link->created_at,
+                        'updated_at' => $link->updated_at,
+                    ];
             });
 
             return response()->json([
@@ -468,6 +485,8 @@ class LinkController extends Controller
                 'password' => 'nullable|string|min:4|max:255',
                 'title' => 'nullable|string|max:255',
                 'description' => 'nullable|string|max:500',
+                'expires_at' => 'nullable|date|after:now',
+                'auto_delete_expired' => 'boolean',
             ]);
 
             $slug = null;
@@ -550,6 +569,8 @@ class LinkController extends Controller
             $link->user_id = $user->id;
             $link->title = $request->title;
             $link->description = $request->description;
+            $link->expires_at = $request->expires_at;
+            $link->auto_delete_expired = $request->boolean('auto_delete_expired', false);
 
             // Handle password protection
             if ($request->filled('password')) {
@@ -568,6 +589,9 @@ class LinkController extends Controller
                     'is_password_protected' => $link->is_password_protected,
                     'title' => $link->title,
                     'description' => $link->description,
+                    'expires_at' => $link->expires_at,
+                    'auto_delete_expired' => $link->auto_delete_expired,
+                    'is_expired' => $link->isExpired(),
                     'created_at' => $link->created_at,
                 ]
             ]);
@@ -856,6 +880,8 @@ class LinkController extends Controller
                 'title' => 'nullable|string|max:255',
                 'description' => 'nullable|string|max:500',
                 'is_disabled' => 'boolean',
+                'expires_at' => 'nullable|date|after:now',
+                'auto_delete_expired' => 'boolean',
             ]);
 
             $link->update($validated);
@@ -870,6 +896,8 @@ class LinkController extends Controller
                     'title' => $link->title,
                     'description' => $link->description,
                     'is_disabled' => $link->is_disabled,
+                    'expires_at' => $link->expires_at,
+                    'auto_delete_expired' => $link->auto_delete_expired,
                     'updated_at' => $link->updated_at,
                 ]
             ]);
