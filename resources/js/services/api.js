@@ -131,7 +131,7 @@ class ApiService {
      */
     async checkSlugAvailability(slug) {
         try {
-            const response = await this.request(`/slug-available/${slug}`);
+            const response = await this.request(`/check-slug?slug=${encodeURIComponent(slug)}`);
             return response.available;
         } catch (error) {
             // If we can't check, assume it's not available to be safe

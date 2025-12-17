@@ -20,7 +20,7 @@ class Link extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'user',
+        'user_id',
         'title',
         'description',
         'url',
@@ -46,7 +46,7 @@ class Link extends Model
      */
     public function owner()
     {
-        return $this->belongsTo(User::class, 'user');
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     /**

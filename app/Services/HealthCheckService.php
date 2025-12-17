@@ -95,6 +95,15 @@ class HealthCheckService
      */
     public function checkRedisConnection(): array
     {
+        // Check if Redis is configured as the cache driver
+        if (config('cache.default') !== 'redis') {
+            return [
+                'status' => 'disabled',
+                'response_time_ms' => null,
+                'message' => 'Redis is not configured as the cache driver',
+            ];
+        }
+
         try {
             $startTime = microtime(true);
 

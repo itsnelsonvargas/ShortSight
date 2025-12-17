@@ -365,13 +365,17 @@ class LinkController extends Controller
         ProcessVisitorAnalytics::dispatch($slug, $visitorSnapshot);
     }
 
-    public function checkSlug(Request $request)
+    public function checkSlug(Request $request, $slug = null)
     {
-        //Get the slug to validate
-        $slug = $request->input('slug');
+        // Get the slug to validate (either from parameter or query)
+        $slugToCheck = $slug ?? $request->input('slug');
 
-        //Check if the slug is already used
-        $exists = \App\Models\Link::where('slug', $slug)->exists();
+        if (!$slugToCheck) {
+            return response()->json(['available' => false, 'message' => 'Slug parameter required']);
+        }
+
+        // Check if the slug is already used
+        $exists = \App\Models\Link::where('slug', $slugToCheck)->exists();
 
         return response()->json(['available' => !$exists]);
     }
@@ -389,6 +393,206 @@ class LinkController extends Controller
     public function destroy($id)
     {
         // Code to delete a specific link
+    }
+
+    /**
+     * Get authenticated user's links
+     */
+    public function getUserLinks(Request $request)
+    {
+        try {
+            $user = auth()->user();
+
+            if (!$user) {
+                return response()->json(['error' => 'Unauthorized'], 401);
+            }
+
+            $links = Link::where('user_id', $user->id)
+                ->orderBy('created_at', 'desc')
+                ->with(['visitors' => function($query) {
+                    $query->selectRaw('link_id, COUNT(*) as click_count')
+                          ->groupBy('link_id');
+                }])
+                ->paginate(20);
+
+            // Transform the data for frontend consumption
+            $links->getCollection()->transform(function ($link) {
+                return [
+                    'id' => $link->id,
+                    'slug' => $link->slug,
+                    'url' => $link->url,
+                    'short_url' => url($link->slug),
+                    'is_password_protected' => $link->is_password_protected,
+                    'is_disabled' => $link->is_disabled,
+                    'clicks' => $link->visitors->first()->click_count ?? 0,
+                    'created_at' => $link->created_at,
+                    'updated_at' => $link->updated_at,
+                ];
+            });
+
+            return response()->json([
+                'links' => $links,
+                'total' => $links->total(),
+                'per_page' => $links->perPage(),
+                'current_page' => $links->currentPage(),
+                'last_page' => $links->lastPage(),
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Failed to get user links', [
+                'user_id' => auth()->id(),
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'error' => 'Failed to retrieve links'
+            ], 500);
+        }
+    }
+
+    /**
+     * Create authenticated user's link
+     */
+    public function storeAuthenticated(Request $request)
+    {
+        try {
+            $user = auth()->user();
+
+            if (!$user) {
+                return response()->json(['error' => 'Unauthorized'], 401);
+            }
+
+            $validated = $request->validate([
+                'url' => 'required|url|max:2048',
+                'customSlugInput' => 'nullable|alpha_dash|max:20|min:3',
+                'password' => 'nullable|string|min:4|max:255',
+                'title' => 'nullable|string|max:255',
+                'description' => 'nullable|string|max:500',
+            ]);
+
+            $slug = null;
+            if ($request->has('customSlug') && !empty($request->customSlugInput)) {
+                $slug = trim($request->customSlugInput);
+
+                // Check if slug is available
+                if (Link::where('slug', $slug)->exists()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'The custom slug "' . $slug . '" is already taken. Please choose a different one.',
+                        'type' => 'validation_error'
+                    ], 422);
+                }
+
+                // Check for reserved words
+                if (in_array(strtolower($slug), ['admin', 'api', 'www', 'dashboard', 'login', 'register'])) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'This slug is reserved and cannot be used.',
+                        'type' => 'validation_error'
+                    ], 422);
+                }
+            } else {
+                // Generate unique slug
+                $attempts = 0;
+                $maxAttempts = 10;
+
+                do {
+                    if ($attempts >= $maxAttempts) {
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'Unable to generate a unique slug. Please try with a custom slug.',
+                            'type' => 'slug_generation_failed'
+                        ], 500);
+                    }
+
+                    $slug = Str::random(7);
+                    $attempts++;
+                } while (Link::where('slug', $slug)->exists());
+            }
+
+            // URL validation
+            $cacheService = app(RedisCacheService::class);
+            $urlSafetyService = app(UrlSafetyService::class);
+
+            $validationResult = $cacheService->getCachedUrlValidation($request->url);
+
+            if ($validationResult === null) {
+                try {
+                    $validationResult = $urlSafetyService->validateUrl($request->url);
+                    $cacheService->cacheUrlValidation($request->url, $validationResult);
+                } catch (\Exception $e) {
+                    \Log::error('URL validation failed', [
+                        'url' => $request->url,
+                        'error' => $e->getMessage()
+                    ]);
+
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Unable to validate URL at this time. Please try again later.',
+                        'type' => 'validation_service_unavailable'
+                    ], 500);
+                }
+            }
+
+            if (!$validationResult['is_safe']) {
+                $errorMessage = 'URL validation failed: ' . implode(', ', $validationResult['errors']);
+                return response()->json([
+                    'success' => false,
+                    'message' => $errorMessage,
+                    'type' => 'validation_error'
+                ], 422);
+            }
+
+            // Create the link
+            $link = new Link();
+            $link->url = $request->url;
+            $link->slug = $slug;
+            $link->user_id = $user->id;
+            $link->title = $request->title;
+            $link->description = $request->description;
+
+            // Handle password protection
+            if ($request->filled('password')) {
+                $link->setPassword($request->password);
+            }
+
+            $link->save();
+
+            return response()->json([
+                'success' => true,
+                'link' => [
+                    'id' => $link->id,
+                    'slug' => $slug,
+                    'short_url' => url($slug),
+                    'original_url' => $request->url,
+                    'is_password_protected' => $link->is_password_protected,
+                    'title' => $link->title,
+                    'description' => $link->description,
+                    'created_at' => $link->created_at,
+                ]
+            ]);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $e->errors(),
+                'type' => 'validation_error'
+            ], 422);
+        } catch (\Exception $e) {
+            \Log::error('Failed to create authenticated link', [
+                'user_id' => auth()->id(),
+                'url' => $request->url ?? null,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Unable to create your short link. Please try again.',
+                'type' => 'database_save_failed'
+            ], 500);
+        }
     }
 
     public function test()
@@ -504,5 +708,234 @@ class LinkController extends Controller
         }
 
         return back()->withErrors(['general' => $message])->withInput();
+    }
+
+    /**
+     * Get link analytics data
+     */
+    public function getLinkAnalytics(Request $request, $slug)
+    {
+        try {
+            $user = auth()->user();
+
+            if (!$user) {
+                return response()->json(['error' => 'Unauthorized'], 401);
+            }
+
+            // Get the link and ensure it belongs to the user
+            $link = Link::where('slug', $slug)
+                       ->where('user_id', $user->id)
+                       ->first();
+
+            if (!$link) {
+                return response()->json([
+                    'error' => 'Link not found or access denied'
+                ], 404);
+            }
+
+            // Get visitor analytics data
+            $visitors = $link->visitors()
+                ->selectRaw('
+                    DATE(created_at) as date,
+                    COUNT(*) as clicks,
+                    COUNT(DISTINCT ip_address) as unique_visitors
+                ')
+                ->where('created_at', '>=', now()->subDays(30))
+                ->groupBy('date')
+                ->orderBy('date', 'desc')
+                ->get();
+
+            // Get geolocation data
+            $geography = $link->visitors()
+                ->selectRaw('
+                    COALESCE(country, \'Unknown\') as country,
+                    COUNT(*) as clicks
+                ')
+                ->where('created_at', '>=', now()->subDays(30))
+                ->groupBy('country')
+                ->orderBy('clicks', 'desc')
+                ->limit(10)
+                ->get();
+
+            // Get device/browser data
+            $devices = $link->visitors()
+                ->selectRaw('
+                    COALESCE(device_type, \'Unknown\') as device_type,
+                    COUNT(*) as clicks
+                ')
+                ->where('created_at', '>=', now()->subDays(30))
+                ->groupBy('device_type')
+                ->orderBy('clicks', 'desc')
+                ->get();
+
+            $browsers = $link->visitors()
+                ->selectRaw('
+                    COALESCE(browser, \'Unknown\') as browser,
+                    COUNT(*) as clicks
+                ')
+                ->where('created_at', '>=', now()->subDays(30))
+                ->groupBy('browser')
+                ->orderBy('clicks', 'desc')
+                ->get();
+
+            // Get referrer data
+            $referrers = $link->visitors()
+                ->selectRaw('
+                    COALESCE(referrer, \'Direct\') as referrer,
+                    COUNT(*) as clicks
+                ')
+                ->where('created_at', '>=', now()->subDays(30))
+                ->groupBy('referrer')
+                ->orderBy('clicks', 'desc')
+                ->limit(10)
+                ->get();
+
+            $totalClicks = $link->visitors()->count();
+            $uniqueVisitors = $link->visitors()->distinct('ip_address')->count('ip_address');
+            $todayClicks = $link->visitors()->whereDate('created_at', today())->count();
+
+            return response()->json([
+                'link' => [
+                    'id' => $link->id,
+                    'slug' => $link->slug,
+                    'url' => $link->url,
+                    'short_url' => url($link->slug),
+                    'title' => $link->title,
+                    'description' => $link->description,
+                    'created_at' => $link->created_at,
+                ],
+                'analytics' => [
+                    'total_clicks' => $totalClicks,
+                    'unique_visitors' => $uniqueVisitors,
+                    'today_clicks' => $todayClicks,
+                    'clicks_over_time' => $visitors,
+                    'geography' => $geography,
+                    'devices' => $devices,
+                    'browsers' => $browsers,
+                    'referrers' => $referrers,
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Failed to get link analytics', [
+                'user_id' => auth()->id(),
+                'slug' => $slug,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'error' => 'Failed to retrieve analytics data'
+            ], 500);
+        }
+    }
+
+    /**
+     * Update link (authenticated users only)
+     */
+    public function updateAuthenticated(Request $request, $id)
+    {
+        try {
+            $user = auth()->user();
+
+            if (!$user) {
+                return response()->json(['error' => 'Unauthorized'], 401);
+            }
+
+            $link = Link::where('id', $id)
+                       ->where('user_id', $user->id)
+                       ->first();
+
+            if (!$link) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Link not found or access denied'
+                ], 404);
+            }
+
+            $validated = $request->validate([
+                'title' => 'nullable|string|max:255',
+                'description' => 'nullable|string|max:500',
+                'is_disabled' => 'boolean',
+            ]);
+
+            $link->update($validated);
+
+            return response()->json([
+                'success' => true,
+                'link' => [
+                    'id' => $link->id,
+                    'slug' => $link->slug,
+                    'url' => $link->url,
+                    'short_url' => url($link->slug),
+                    'title' => $link->title,
+                    'description' => $link->description,
+                    'is_disabled' => $link->is_disabled,
+                    'updated_at' => $link->updated_at,
+                ]
+            ]);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $e->errors(),
+                'type' => 'validation_error'
+            ], 422);
+        } catch (\Exception $e) {
+            \Log::error('Failed to update link', [
+                'user_id' => auth()->id(),
+                'link_id' => $id,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update link'
+            ], 500);
+        }
+    }
+
+    /**
+     * Delete link (authenticated users only)
+     */
+    public function destroyAuthenticated(Request $request, $id)
+    {
+        try {
+            $user = auth()->user();
+
+            if (!$user) {
+                return response()->json(['error' => 'Unauthorized'], 401);
+            }
+
+            $link = Link::where('id', $id)
+                       ->where('user_id', $user->id)
+                       ->first();
+
+            if (!$link) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Link not found or access denied'
+                ], 404);
+            }
+
+            $link->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Link deleted successfully'
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Failed to delete link', [
+                'user_id' => auth()->id(),
+                'link_id' => $id,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to delete link'
+            ], 500);
+        }
     }
 }

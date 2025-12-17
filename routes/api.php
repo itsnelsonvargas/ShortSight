@@ -50,6 +50,24 @@ Route::middleware('link.creation.throttle')->post('/links', [LinkController::cla
 Route::middleware('api.throttle')->get('/check-slug', [LinkController::class, 'checkSlug']);
 Route::middleware('api.throttle')->post('/links/{slug}/verify-password', [LinkController::class, 'verifyPassword']);
 
+/*
+ * Authenticated User Link Management Routes
+ */
+Route::middleware(['auth:sanctum', 'api.throttle'])->group(function () {
+    // User links management
+    Route::get('/user/links', [LinkController::class, 'getUserLinks']);
+    Route::post('/user/links', [LinkController::class, 'storeAuthenticated']); // Authenticated link creation
+    Route::get('/links/{id}', [LinkController::class, 'show']);
+    Route::put('/links/{id}', [LinkController::class, 'updateAuthenticated']);
+    Route::delete('/links/{id}', [LinkController::class, 'destroyAuthenticated']);
+
+    // Link analytics
+    Route::get('/links/{slug}/analytics', [LinkController::class, 'getLinkAnalytics']);
+
+    // Slug availability check (authenticated)
+    Route::get('/slug-available/{slug}', [LinkController::class, 'checkSlug']);
+});
+
 /*********************************
 *                                *
 * v1 API Routes                  *
